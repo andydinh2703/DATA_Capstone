@@ -1,0 +1,277 @@
+---
+title: "Infant Mortality EDA"
+author: "Andy"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo    = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width  = 9,
+  fig.height = 5
+)
+```
+
+## 1. Load Libraries & Data
+
+```{r load}
+library(tidyverse)
+
+# Read the data — note: NYS 2020 has a comma in the Total field, so we
+# read it as character first and clean it manually.
+raw <- read_csv(
+  here::here("data", "Infant Mortality Data.csv"),
+  col_types = cols(Total = col_character())
+)
+
+df <- raw %>%
+  mutate(
+    Total = as.numeric(gsub(",", "", Total)),
+    Rate  = as.numeric(Rate),
+    Age   = factor(Age, levels = c("Infant", "Neonatal"))
+  )
+
+glimpse(df)
+```
+
+---
+
+## 2. Dataset Overview
+
+```{r summary}
+summary(df)
+```
+
+The dataset covers **three locations** — Geneva (city), Ontario (county), and NYS (New York State statewide) — across **2007–2021**, for two mortality categories:
+
+- **Infant**: death within the first year of life
+- **Neonatal**: death within the first 28 days of life
+
+The rate is expressed as **deaths per 1,000 live births**.
+
+---
+
+## 3. Data Quality Check
+
+Before exploring trends, it's worth flagging a few things worth thinking about.
+
+### 3a. Zero-death years
+
+Geneva is a small city. In many years, there were simply no infant deaths recorded, which produces a rate of 0. This is not necessarily good news — it reflects **small sample size**, which makes rates highly volatile.
+
+```{r zeros}
+df %>%
+  filter(Deaths == 0) %>%
+  select(Location, Year, Age, Total, Deaths, Rate) %>%
+  arrange(Location, Age, Year)
+```
+
+### 3b. Potential data anomaly — Ontario 2021 Neonatal
+
+```{r anomaly}
+df %>%
+  filter(Location == "Ontario", Age == "Neonatal", Year == 2021)
+```
+
+Ontario 2021 Neonatal shows **63 deaths** from 979 births. Back-calculating: 63/979 × 1000 ≈ 64.3, but the Rate column says 6.1. This is worth investigating — it looks like the Deaths value may be a typo (63 instead of 6). Keep this in mind when reading Neonatal charts.
+
+### 3c. Declining total births over time
+
+```{r births-trend}
+df %>%
+  filter(Age == "Infant") %>%           # avoid double-counting (same births for both types)
+  ggplot(aes(x = Year, y = Total, color = Location)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  scale_y_continuous(labels = scales::comma) +
+  labs(
+    title   = "Total Live Births by Location (2007–2021)",
+    y       = "Births",
+    x       = "Year",
+    color   = "Location"
+  ) +
+  theme_minimal(base_size = 13)
+```
+
+Births have been declining across all three locations over the period — a useful backdrop for interpreting death counts vs. rates.
+
+---
+
+## 4. Mortality Rate Trends Over Time
+
+### 4a. Infant mortality rate
+
+```{r infant-rate}
+df %>%
+  filter(Age == "Infant") %>%
+  ggplot(aes(x = Year, y = Rate, color = Location)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2.5) +
+  scale_x_continuous(breaks = 2007:2021) +
+  labs(
+    title    = "Infant Mortality Rate (per 1,000 live births)",
+    subtitle = "Deaths within the first year of life",
+    y        = "Rate",
+    x        = "Year",
+    color    = "Location"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Geneva's rate is extremely erratic — swinging from 0 to 16.5 (2019) — which reflects its small birth count (~120–170/year). A single death changes the rate dramatically. Ontario and NYS track more closely together.
+
+### 4b. Neonatal mortality rate
+
+```{r neonatal-rate}
+df %>%
+  filter(Age == "Neonatal") %>%
+  ggplot(aes(x = Year, y = Rate, color = Location)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 2.5) +
+  scale_x_continuous(breaks = 2007:2021) +
+  labs(
+    title    = "Neonatal Mortality Rate (per 1,000 live births)",
+    subtitle = "Deaths within the first 28 days of life",
+    y        = "Rate",
+    x        = "Year",
+    color    = "Location"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+### 4c. Both types side by side (faceted)
+
+```{r facet-rate}
+df %>%
+  ggplot(aes(x = Year, y = Rate, color = Location)) +
+  geom_line(linewidth = 0.9) +
+  geom_point(size = 2) +
+  facet_wrap(~Age, ncol = 2) +
+  scale_x_continuous(breaks = seq(2007, 2021, 2)) +
+  labs(
+    title  = "Mortality Rates by Type and Location",
+    y      = "Rate (per 1,000)",
+    x      = "Year",
+    color  = "Location"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+---
+
+## 5. Infant vs. Neonatal: How Much Happens After Day 28?
+
+Neonatal deaths (first 28 days) are a subset of infant deaths (first year). The **post-neonatal** deaths — those occurring between day 29 and the end of year 1 — can be derived by subtraction.
+
+```{r postneonatal}
+# Reshape to compute post-neonatal deaths
+pn <- df %>%
+  select(Location, Year, Age, Deaths, Rate) %>%
+  pivot_wider(names_from = Age, values_from = c(Deaths, Rate)) %>%
+  mutate(
+    Deaths_PostNeonatal = Deaths_Infant - Deaths_Neonatal,
+    Pct_Neonatal        = round(Deaths_Neonatal / Deaths_Infant * 100, 1)
+  ) %>%
+  filter(!is.na(Deaths_Infant), Deaths_Infant > 0)
+
+pn %>%
+  select(Location, Year, Deaths_Infant, Deaths_Neonatal, Deaths_PostNeonatal, Pct_Neonatal) %>%
+  arrange(Location, Year)
+```
+
+```{r postneonatal-plot}
+pn %>%
+  select(Location, Year, Deaths_Neonatal, Deaths_PostNeonatal) %>%
+  pivot_longer(cols = starts_with("Deaths_"), names_to = "Period", values_to = "Deaths") %>%
+  mutate(Period = recode(Period,
+    "Deaths_Neonatal"     = "Neonatal (0-28 days)",
+    "Deaths_PostNeonatal" = "Post-neonatal (29 days-1 year)"
+  )) %>%
+  ggplot(aes(x = Year, y = Deaths, fill = Period)) +
+  geom_col() +
+  facet_wrap(~Location, scales = "free_y") +
+  scale_x_continuous(breaks = seq(2007, 2021, 2)) +
+  labs(
+    title  = "Neonatal vs. Post-Neonatal Deaths by Location",
+    y      = "Deaths",
+    x      = "Year",
+    fill   = "Period"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+---
+
+## 6. Geneva Closer Look
+
+Geneva's small population makes aggregate rates noisy, but the raw death counts are interpretable. Every death matters here.
+
+```{r geneva}
+df %>%
+  filter(Location == "Geneva") %>%
+  ggplot(aes(x = Year, y = Deaths, fill = Age)) +
+  geom_col(position = "dodge") +
+  scale_x_continuous(breaks = 2007:2021) +
+  labs(
+    title    = "Geneva: Raw Death Counts by Year and Type",
+    subtitle = "Very small numbers — each death moves the rate significantly",
+    y        = "Deaths",
+    x        = "Year",
+    fill     = "Type"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r geneva-rate-note}
+# Show how a single birth/death changes Geneva's rate drastically
+df %>%
+  filter(Location == "Geneva", Age == "Infant") %>%
+  mutate(Rate_Check = round(Deaths / Total * 1000, 1)) %>%
+  select(Year, Total, Deaths, Rate, Rate_Check)
+```
+
+---
+
+## 7. Summary Statistics by Location
+
+```{r summary-stats}
+df %>%
+  filter(Rate > 0) %>%             # exclude structural zeros (no deaths)
+  group_by(Location, Age) %>%
+  summarise(
+    Mean_Rate   = round(mean(Rate), 2),
+    Median_Rate = round(median(Rate), 2),
+    Min_Rate    = min(Rate),
+    Max_Rate    = max(Rate),
+    SD_Rate     = round(sd(Rate), 2),
+    .groups     = "drop"
+  ) %>%
+  arrange(Age, Location)
+```
+
+---
+
+## 8. Key Takeaways
+
+1. **Geneva's rates are unreliable as a standalone metric** — with ~150 births/year, one or two deaths create huge rate swings. Any comparison to Ontario or NYS should be interpreted cautiously.
+
+2. **NYS shows a consistent downward trend** in both infant and neonatal rates from 2007 to 2020, which is encouraging. Ontario roughly mirrors this.
+
+3. **Neonatal deaths make up the majority of infant deaths** at all three locations, suggesting that interventions targeting the first 28 days of life would have the greatest impact.
+
+4. **The Ontario 2021 Neonatal record (63 deaths)** appears to be a data entry error and should be verified against the source before any conclusions are drawn from it.
+
+5. **Total births are declining** across all locations. This is important context — even if death counts stay flat, the rate can rise, which may be misleading without this backdrop.
