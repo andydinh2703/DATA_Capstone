@@ -1,0 +1,562 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\documentclass[
+]{article}
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Infant Mortality EDA},
+  pdfauthor={Andy},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Infant Mortality EDA}
+\author{Andy}
+\date{2026-02-25}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+\subsection{1. Load Libraries \& Data}\label{load-libraries-data}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(tidyverse)}
+
+\CommentTok{\# Read the data — note: NYS 2020 has a comma in the Total field, so we}
+\CommentTok{\# read it as character first and clean it manually.}
+\NormalTok{raw }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(}
+\NormalTok{  here}\SpecialCharTok{::}\FunctionTok{here}\NormalTok{(}\StringTok{"data"}\NormalTok{, }\StringTok{"Infant Mortality Data.csv"}\NormalTok{),}
+  \AttributeTok{col\_types =} \FunctionTok{cols}\NormalTok{(}\AttributeTok{Total =} \FunctionTok{col\_character}\NormalTok{())}
+\NormalTok{)}
+
+\NormalTok{df }\OtherTok{\textless{}{-}}\NormalTok{ raw }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{Total =} \FunctionTok{as.numeric}\NormalTok{(}\FunctionTok{gsub}\NormalTok{(}\StringTok{","}\NormalTok{, }\StringTok{""}\NormalTok{, Total)),}
+    \AttributeTok{Rate  =} \FunctionTok{as.numeric}\NormalTok{(Rate),}
+    \AttributeTok{Age   =} \FunctionTok{factor}\NormalTok{(Age, }\AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"Infant"}\NormalTok{, }\StringTok{"Neonatal"}\NormalTok{))}
+\NormalTok{  )}
+
+\FunctionTok{glimpse}\NormalTok{(df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Rows: 90
+## Columns: 7
+## $ Location <chr> "Geneva", "Ontario", "NYS", "Geneva", "Ontario", "NYS", "Gene~
+## $ Source   <chr> "https://www.health.ny.gov/statistics/vital_statistics/2010/t~
+## $ Year     <dbl> 2010, 2010, 2010, 2011, 2011, 2011, 2012, 2012, 2012, 2013, 2~
+## $ Total    <dbl> 149, 1036, 242914, 149, 1020, 239736, 159, 1045, 239224, 167,~
+## $ Deaths   <dbl> 2, 7, 1227, 0, 5, 1202, 1, 5, 1191, 1, 3, 1144, 0, 5, 1090, 1~
+## $ Rate     <dbl> 13.4, 6.8, 5.1, 0.0, 4.9, 5.0, 6.3, 4.8, 5.0, 6.0, 2.9, 4.9, ~
+## $ Age      <fct> Infant, Infant, Infant, Infant, Infant, Infant, Infant, Infan~
+\end{verbatim}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{2. Dataset Overview}\label{dataset-overview}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{summary}\NormalTok{(df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##    Location            Source               Year          Total       
+##  Length:90          Length:90          Min.   :2007   Min.   :   121  
+##  Class :character   Class :character   1st Qu.:2010   1st Qu.:   167  
+##  Mode  :character   Mode  :character   Median :2014   Median :  1028  
+##                                        Mean   :2014   Mean   : 78268  
+##                                        3rd Qu.:2018   3rd Qu.:225162  
+##                                        Max.   :2021   Max.   :252662  
+##      Deaths            Rate              Age    
+##  Min.   :   0.0   Min.   : 0.000   Infant  :45  
+##  1st Qu.:   1.0   1st Qu.: 2.925   Neonatal:45  
+##  Median :   5.0   Median : 4.250                
+##  Mean   : 312.4   Mean   : 4.424                
+##  3rd Qu.: 743.8   3rd Qu.: 5.725                
+##  Max.   :1382.0   Max.   :16.500
+\end{verbatim}
+
+The dataset covers \textbf{three locations} --- Geneva (city), Ontario
+(county), and NYS (New York State statewide) --- across
+\textbf{2007--2021}, for two mortality categories:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Infant}: death within the first year of life
+\item
+  \textbf{Neonatal}: death within the first 28 days of life
+\end{itemize}
+
+The rate is expressed as \textbf{deaths per 1,000 live births}.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{3. Data Quality Check}\label{data-quality-check}
+
+Before exploring trends, it's worth flagging a few things worth thinking
+about.
+
+\subsubsection{3a. Zero-death years}\label{a.-zero-death-years}
+
+Geneva is a small city. In many years, there were simply no infant
+deaths recorded, which produces a rate of 0. This is not necessarily
+good news --- it reflects \textbf{small sample size}, which makes rates
+highly volatile.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(Deaths }\SpecialCharTok{==} \DecValTok{0}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(Location, Year, Age, Total, Deaths, Rate) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(Location, Age, Year)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 14 x 6
+##    Location  Year Age      Total Deaths  Rate
+##    <chr>    <dbl> <fct>    <dbl>  <dbl> <dbl>
+##  1 Geneva    2011 Infant     149      0     0
+##  2 Geneva    2014 Infant     164      0     0
+##  3 Geneva    2016 Infant     149      0     0
+##  4 Geneva    2017 Infant     169      0     0
+##  5 Geneva    2018 Infant     137      0     0
+##  6 Geneva    2020 Infant     133      0     0
+##  7 Geneva    2021 Infant     135      0     0
+##  8 Geneva    2011 Neonatal   149      0     0
+##  9 Geneva    2014 Neonatal   164      0     0
+## 10 Geneva    2016 Neonatal   149      0     0
+## 11 Geneva    2017 Neonatal   169      0     0
+## 12 Geneva    2018 Neonatal   137      0     0
+## 13 Geneva    2020 Neonatal   133      0     0
+## 14 Geneva    2021 Neonatal   135      0     0
+\end{verbatim}
+
+\subsubsection{3b. Potential data anomaly --- Ontario 2021
+Neonatal}\label{b.-potential-data-anomaly-ontario-2021-neonatal}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(Location }\SpecialCharTok{==} \StringTok{"Ontario"}\NormalTok{, Age }\SpecialCharTok{==} \StringTok{"Neonatal"}\NormalTok{, Year }\SpecialCharTok{==} \DecValTok{2021}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 1 x 7
+##   Location Source                                  Year Total Deaths  Rate Age  
+##   <chr>    <chr>                                  <dbl> <dbl>  <dbl> <dbl> <fct>
+## 1 Ontario  https://www.health.ny.gov/statistics/~  2021   979     63   6.1 Neon~
+\end{verbatim}
+
+Ontario 2021 Neonatal shows \textbf{63 deaths} from 979 births.
+Back-calculating: 63/979 × 1000 ≈ 64.3, but the Rate column says 6.1.
+This is worth investigating --- it looks like the Deaths value may be a
+typo (63 instead of 6). Keep this in mind when reading Neonatal charts.
+
+\subsubsection{3c. Declining total births over
+time}\label{c.-declining-total-births-over-time}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(Age }\SpecialCharTok{==} \StringTok{"Infant"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}           \CommentTok{\# avoid double{-}counting (same births for both types)}
+  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Year, }\AttributeTok{y =}\NormalTok{ Total, }\AttributeTok{color =}\NormalTok{ Location)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_line}\NormalTok{(}\AttributeTok{linewidth =} \DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{size =} \DecValTok{2}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_y\_continuous}\NormalTok{(}\AttributeTok{labels =}\NormalTok{ scales}\SpecialCharTok{::}\NormalTok{comma) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title   =} \StringTok{"Total Live Births by Location (2007–2021)"}\NormalTok{,}
+    \AttributeTok{y       =} \StringTok{"Births"}\NormalTok{,}
+    \AttributeTok{x       =} \StringTok{"Year"}\NormalTok{,}
+    \AttributeTok{color   =} \StringTok{"Location"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{(}\AttributeTok{base\_size =} \DecValTok{13}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{Infant_EDA_files/figure-latex/births-trend-1.pdf}}
+
+Births have been declining across all three locations over the period
+--- a useful backdrop for interpreting death counts vs.~rates.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{4. Mortality Rate Trends Over
+Time}\label{mortality-rate-trends-over-time}
+
+\subsubsection{4a. Infant mortality
+rate}\label{a.-infant-mortality-rate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(Age }\SpecialCharTok{==} \StringTok{"Infant"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Year, }\AttributeTok{y =}\NormalTok{ Rate, }\AttributeTok{color =}\NormalTok{ Location)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_line}\NormalTok{(}\AttributeTok{linewidth =} \DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{size =} \FloatTok{2.5}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_x\_continuous}\NormalTok{(}\AttributeTok{breaks =} \DecValTok{2007}\SpecialCharTok{:}\DecValTok{2021}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title    =} \StringTok{"Infant Mortality Rate (per 1,000 live births)"}\NormalTok{,}
+    \AttributeTok{subtitle =} \StringTok{"Deaths within the first year of life"}\NormalTok{,}
+    \AttributeTok{y        =} \StringTok{"Rate"}\NormalTok{,}
+    \AttributeTok{x        =} \StringTok{"Year"}\NormalTok{,}
+    \AttributeTok{color    =} \StringTok{"Location"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{(}\AttributeTok{base\_size =} \DecValTok{13}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{angle =} \DecValTok{45}\NormalTok{, }\AttributeTok{hjust =} \DecValTok{1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{Infant_EDA_files/figure-latex/infant-rate-1.pdf}}
+
+Geneva's rate is extremely erratic --- swinging from 0 to 16.5 (2019)
+--- which reflects its small birth count (\textasciitilde120--170/year).
+A single death changes the rate dramatically. Ontario and NYS track more
+closely together.
+
+\subsubsection{4b. Neonatal mortality
+rate}\label{b.-neonatal-mortality-rate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(Age }\SpecialCharTok{==} \StringTok{"Neonatal"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Year, }\AttributeTok{y =}\NormalTok{ Rate, }\AttributeTok{color =}\NormalTok{ Location)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_line}\NormalTok{(}\AttributeTok{linewidth =} \DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{size =} \FloatTok{2.5}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_x\_continuous}\NormalTok{(}\AttributeTok{breaks =} \DecValTok{2007}\SpecialCharTok{:}\DecValTok{2021}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title    =} \StringTok{"Neonatal Mortality Rate (per 1,000 live births)"}\NormalTok{,}
+    \AttributeTok{subtitle =} \StringTok{"Deaths within the first 28 days of life"}\NormalTok{,}
+    \AttributeTok{y        =} \StringTok{"Rate"}\NormalTok{,}
+    \AttributeTok{x        =} \StringTok{"Year"}\NormalTok{,}
+    \AttributeTok{color    =} \StringTok{"Location"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{(}\AttributeTok{base\_size =} \DecValTok{13}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{angle =} \DecValTok{45}\NormalTok{, }\AttributeTok{hjust =} \DecValTok{1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{Infant_EDA_files/figure-latex/neonatal-rate-1.pdf}}
+
+\subsubsection{4c. Both types side by side
+(faceted)}\label{c.-both-types-side-by-side-faceted}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Year, }\AttributeTok{y =}\NormalTok{ Rate, }\AttributeTok{color =}\NormalTok{ Location)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_line}\NormalTok{(}\AttributeTok{linewidth =} \FloatTok{0.9}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{size =} \DecValTok{2}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{Age, }\AttributeTok{ncol =} \DecValTok{2}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_x\_continuous}\NormalTok{(}\AttributeTok{breaks =} \FunctionTok{seq}\NormalTok{(}\DecValTok{2007}\NormalTok{, }\DecValTok{2021}\NormalTok{, }\DecValTok{2}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title  =} \StringTok{"Mortality Rates by Type and Location"}\NormalTok{,}
+    \AttributeTok{y      =} \StringTok{"Rate (per 1,000)"}\NormalTok{,}
+    \AttributeTok{x      =} \StringTok{"Year"}\NormalTok{,}
+    \AttributeTok{color  =} \StringTok{"Location"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{(}\AttributeTok{base\_size =} \DecValTok{13}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{angle =} \DecValTok{45}\NormalTok{, }\AttributeTok{hjust =} \DecValTok{1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{Infant_EDA_files/figure-latex/facet-rate-1.pdf}}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{5. Infant vs.~Neonatal: How Much Happens After Day
+28?}\label{infant-vs.-neonatal-how-much-happens-after-day-28}
+
+Neonatal deaths (first 28 days) are a subset of infant deaths (first
+year). The \textbf{post-neonatal} deaths --- those occurring between day
+29 and the end of year 1 --- can be derived by subtraction.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Reshape to compute post{-}neonatal deaths}
+\NormalTok{pn }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(Location, Year, Age, Deaths, Rate) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pivot\_wider}\NormalTok{(}\AttributeTok{names\_from =}\NormalTok{ Age, }\AttributeTok{values\_from =} \FunctionTok{c}\NormalTok{(Deaths, Rate)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{Deaths\_PostNeonatal =}\NormalTok{ Deaths\_Infant }\SpecialCharTok{{-}}\NormalTok{ Deaths\_Neonatal,}
+    \AttributeTok{Pct\_Neonatal        =} \FunctionTok{round}\NormalTok{(Deaths\_Neonatal }\SpecialCharTok{/}\NormalTok{ Deaths\_Infant }\SpecialCharTok{*} \DecValTok{100}\NormalTok{, }\DecValTok{1}\NormalTok{)}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(Deaths\_Infant), Deaths\_Infant }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{)}
+
+\NormalTok{pn }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(Location, Year, Deaths\_Infant, Deaths\_Neonatal, Deaths\_PostNeonatal, Pct\_Neonatal) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(Location, Year)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 38 x 6
+##    Location  Year Deaths_Infant Deaths_Neonatal Deaths_PostNeonatal Pct_Neonatal
+##    <chr>    <dbl>         <dbl>           <dbl>               <dbl>        <dbl>
+##  1 Geneva    2007             2               1                   1         50  
+##  2 Geneva    2008             2               1                   1         50  
+##  3 Geneva    2009             1               1                   0        100  
+##  4 Geneva    2010             2               2                   0        100  
+##  5 Geneva    2012             1               1                   0        100  
+##  6 Geneva    2013             1               1                   0        100  
+##  7 Geneva    2015             1               1                   0        100  
+##  8 Geneva    2019             2               1                   1         50  
+##  9 NYS       2007          1382             910                 472         65.8
+## 10 NYS       2008          1359             919                 440         67.6
+## # i 28 more rows
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pn }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(Location, Year, Deaths\_Neonatal, Deaths\_PostNeonatal) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{pivot\_longer}\NormalTok{(}\AttributeTok{cols =} \FunctionTok{starts\_with}\NormalTok{(}\StringTok{"Deaths\_"}\NormalTok{), }\AttributeTok{names\_to =} \StringTok{"Period"}\NormalTok{, }\AttributeTok{values\_to =} \StringTok{"Deaths"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{Period =} \FunctionTok{recode}\NormalTok{(Period,}
+    \StringTok{"Deaths\_Neonatal"}     \OtherTok{=} \StringTok{"Neonatal (0{-}28 days)"}\NormalTok{,}
+    \StringTok{"Deaths\_PostNeonatal"} \OtherTok{=} \StringTok{"Post{-}neonatal (29 days{-}1 year)"}
+\NormalTok{  )) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Year, }\AttributeTok{y =}\NormalTok{ Deaths, }\AttributeTok{fill =}\NormalTok{ Period)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_col}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{Location, }\AttributeTok{scales =} \StringTok{"free\_y"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_x\_continuous}\NormalTok{(}\AttributeTok{breaks =} \FunctionTok{seq}\NormalTok{(}\DecValTok{2007}\NormalTok{, }\DecValTok{2021}\NormalTok{, }\DecValTok{2}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title  =} \StringTok{"Neonatal vs. Post{-}Neonatal Deaths by Location"}\NormalTok{,}
+    \AttributeTok{y      =} \StringTok{"Deaths"}\NormalTok{,}
+    \AttributeTok{x      =} \StringTok{"Year"}\NormalTok{,}
+    \AttributeTok{fill   =} \StringTok{"Period"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{(}\AttributeTok{base\_size =} \DecValTok{13}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{angle =} \DecValTok{45}\NormalTok{, }\AttributeTok{hjust =} \DecValTok{1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{Infant_EDA_files/figure-latex/postneonatal-plot-1.pdf}}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{6. Geneva Closer Look}\label{geneva-closer-look}
+
+Geneva's small population makes aggregate rates noisy, but the raw death
+counts are interpretable. Every death matters here.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(Location }\SpecialCharTok{==} \StringTok{"Geneva"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Year, }\AttributeTok{y =}\NormalTok{ Deaths, }\AttributeTok{fill =}\NormalTok{ Age)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_col}\NormalTok{(}\AttributeTok{position =} \StringTok{"dodge"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_x\_continuous}\NormalTok{(}\AttributeTok{breaks =} \DecValTok{2007}\SpecialCharTok{:}\DecValTok{2021}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}
+    \AttributeTok{title    =} \StringTok{"Geneva: Raw Death Counts by Year and Type"}\NormalTok{,}
+    \AttributeTok{subtitle =} \StringTok{"Very small numbers — each death moves the rate significantly"}\NormalTok{,}
+    \AttributeTok{y        =} \StringTok{"Deaths"}\NormalTok{,}
+    \AttributeTok{x        =} \StringTok{"Year"}\NormalTok{,}
+    \AttributeTok{fill     =} \StringTok{"Type"}
+\NormalTok{  ) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{(}\AttributeTok{base\_size =} \DecValTok{13}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{angle =} \DecValTok{45}\NormalTok{, }\AttributeTok{hjust =} \DecValTok{1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{Infant_EDA_files/figure-latex/geneva-1.pdf}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Show how a single birth/death changes Geneva\textquotesingle{}s rate drastically}
+\NormalTok{df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(Location }\SpecialCharTok{==} \StringTok{"Geneva"}\NormalTok{, Age }\SpecialCharTok{==} \StringTok{"Infant"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{Rate\_Check =} \FunctionTok{round}\NormalTok{(Deaths }\SpecialCharTok{/}\NormalTok{ Total }\SpecialCharTok{*} \DecValTok{1000}\NormalTok{, }\DecValTok{1}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{select}\NormalTok{(Year, Total, Deaths, Rate, Rate\_Check)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 15 x 5
+##     Year Total Deaths  Rate Rate_Check
+##    <dbl> <dbl>  <dbl> <dbl>      <dbl>
+##  1  2010   149      2  13.4       13.4
+##  2  2011   149      0   0          0  
+##  3  2012   159      1   6.3        6.3
+##  4  2013   167      1   6          6  
+##  5  2014   164      0   0          0  
+##  6  2015   167      1   6          6  
+##  7  2016   149      0   0          0  
+##  8  2009   156      1   6.4        6.4
+##  9  2008   173      2  11.6       11.6
+## 10  2007   168      2  11.9       11.9
+## 11  2017   169      0   0          0  
+## 12  2018   137      0   0          0  
+## 13  2019   121      2  16.5       16.5
+## 14  2020   133      0   0          0  
+## 15  2021   135      0   0          0
+\end{verbatim}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{7. Summary Statistics by
+Location}\label{summary-statistics-by-location}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(Rate }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}             \CommentTok{\# exclude structural zeros (no deaths)}
+  \FunctionTok{group\_by}\NormalTok{(Location, Age) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarise}\NormalTok{(}
+    \AttributeTok{Mean\_Rate   =} \FunctionTok{round}\NormalTok{(}\FunctionTok{mean}\NormalTok{(Rate), }\DecValTok{2}\NormalTok{),}
+    \AttributeTok{Median\_Rate =} \FunctionTok{round}\NormalTok{(}\FunctionTok{median}\NormalTok{(Rate), }\DecValTok{2}\NormalTok{),}
+    \AttributeTok{Min\_Rate    =} \FunctionTok{min}\NormalTok{(Rate),}
+    \AttributeTok{Max\_Rate    =} \FunctionTok{max}\NormalTok{(Rate),}
+    \AttributeTok{SD\_Rate     =} \FunctionTok{round}\NormalTok{(}\FunctionTok{sd}\NormalTok{(Rate), }\DecValTok{2}\NormalTok{),}
+    \AttributeTok{.groups     =} \StringTok{"drop"}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(Age, Location)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 6 x 7
+##   Location Age      Mean_Rate Median_Rate Min_Rate Max_Rate SD_Rate
+##   <chr>    <fct>        <dbl>       <dbl>    <dbl>    <dbl>   <dbl>
+## 1 Geneva   Infant        9.76        9         6       16.5    4.11
+## 2 NYS      Infant        4.75        4.6       4.1      5.5    0.46
+## 3 Ontario  Infant        5.45        5.1       2.9      8.9    1.79
+## 4 Geneva   Neonatal      7.28        6.15      5.8     13.4    2.6 
+## 5 NYS      Neonatal      3.18        3.1       2.6      3.7    0.38
+## 6 Ontario  Neonatal      4.09        3.9       2        7.6    1.48
+\end{verbatim}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{8. Key Takeaways}\label{key-takeaways}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{Geneva's rates are unreliable as a standalone metric} --- with
+  \textasciitilde150 births/year, one or two deaths create huge rate
+  swings. Any comparison to Ontario or NYS should be interpreted
+  cautiously.
+\item
+  \textbf{NYS shows a consistent downward trend} in both infant and
+  neonatal rates from 2007 to 2020, which is encouraging. Ontario
+  roughly mirrors this.
+\item
+  \textbf{Neonatal deaths make up the majority of infant deaths} at all
+  three locations, suggesting that interventions targeting the first 28
+  days of life would have the greatest impact.
+\item
+  \textbf{The Ontario 2021 Neonatal record (63 deaths)} appears to be a
+  data entry error and should be verified against the source before any
+  conclusions are drawn from it.
+\item
+  \textbf{Total births are declining} across all locations. This is
+  important context --- even if death counts stay flat, the rate can
+  rise, which may be misleading without this backdrop.
+\end{enumerate}
+
+\end{document}
