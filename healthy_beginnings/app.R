@@ -36,19 +36,19 @@ make_tab_ui <- function(id, label) {
           title    = "Geneva",
           value    = textOutput(ns("kpi_geneva")),
           showcase = bsicons::bs_icon("geo-alt-fill"),
-          theme    = value_box_theme(bg = "#E74C3C", fg = "#fff")
+          theme    = value_box_theme(bg = location_colors["Geneva"], fg = "#fff")
         ),
         value_box(
           title    = "Ontario County",
           value    = textOutput(ns("kpi_ontario")),
           showcase = bsicons::bs_icon("geo-alt-fill"),
-          theme    = value_box_theme(bg = "#2ECC71", fg = "#fff")
+          theme    = value_box_theme(bg = location_colors["Ontario"], fg = "#fff")
         ),
         value_box(
           title    = "New York State",
           value    = textOutput(ns("kpi_nys")),
           showcase = bsicons::bs_icon("geo-alt-fill"),
-          theme    = value_box_theme(bg = "#3498DB", fg = "#fff")
+          theme    = value_box_theme(bg = location_colors["NYS"], fg = "#fff")
         )
       ),
       card(

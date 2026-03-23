@@ -1,0 +1,114 @@
+<h2>Stable Home Tab — Overall Layout</h2>
+<p class="subtitle">One top-level "Stable Home" tab containing three inner sub-tabs. How should the sub-tab navigation sit?</p>
+
+<div class="options">
+
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Sub-tabs as pills inside the main panel</h3>
+      <p>Shared sidebar (year slider + location checkboxes). The three indicators are pill-style nav buttons at the top of the main content area.</p>
+      <div style="margin-top:12px;">
+        <div class="mockup">
+          <div class="mockup-header">Stable Home tab</div>
+          <div class="mockup-body" style="display:flex;gap:0;padding:0;min-height:220px;">
+            <!-- Sidebar -->
+            <div style="width:140px;background:#1a2535;border-right:1px solid #2d3f55;padding:12px;flex-shrink:0;">
+              <div style="font-size:10px;color:#8899aa;margin-bottom:6px;">YEAR RANGE</div>
+              <div style="background:#2d3f55;border-radius:4px;padding:6px;font-size:10px;color:#cdd6e0;margin-bottom:12px;">2010 — 2023</div>
+              <div style="font-size:10px;color:#8899aa;margin-bottom:6px;">LOCATION</div>
+              <div style="font-size:10px;color:#E74C3C;margin-bottom:3px;">☑ Geneva</div>
+              <div style="font-size:10px;color:#2ECC71;margin-bottom:3px;">☑ Ontario</div>
+              <div style="font-size:10px;color:#3498DB;margin-bottom:3px;">☑ NYS</div>
+              <div style="margin-top:12px;padding:8px;background:#2d3f55;border-radius:4px;font-size:9px;color:#8899aa;font-style:italic;">Note: Family structure data only available 2010–2017</div>
+            </div>
+            <!-- Main panel -->
+            <div style="flex:1;padding:12px;">
+              <!-- Pill sub-tabs -->
+              <div style="display:flex;gap:6px;margin-bottom:12px;">
+                <div style="background:#3498DB;color:white;border-radius:20px;padding:4px 10px;font-size:10px;font-weight:600;">Poverty</div>
+                <div style="background:#2d3f55;color:#8899aa;border-radius:20px;padding:4px 10px;font-size:10px;">Insurance</div>
+                <div style="background:#2d3f55;color:#8899aa;border-radius:20px;padding:4px 10px;font-size:10px;">Family Structure</div>
+              </div>
+              <!-- KPI boxes -->
+              <div style="display:flex;gap:6px;margin-bottom:10px;">
+                <div style="flex:1;background:#E74C3C22;border:1px solid #E74C3C44;border-radius:6px;padding:8px;text-align:center;">
+                  <div style="font-size:9px;color:#8899aa;">Geneva</div>
+                  <div style="font-size:16px;font-weight:700;color:#E74C3C;">15.2%</div>
+                  <div style="font-size:9px;color:#8899aa;">poverty rate</div>
+                </div>
+                <div style="flex:1;background:#2ECC7122;border:1px solid #2ECC7144;border-radius:6px;padding:8px;text-align:center;">
+                  <div style="font-size:9px;color:#8899aa;">Ontario</div>
+                  <div style="font-size:16px;font-weight:700;color:#2ECC71;">4.9%</div>
+                  <div style="font-size:9px;color:#8899aa;">poverty rate</div>
+                </div>
+                <div style="flex:1;background:#3498DB22;border:1px solid #3498DB44;border-radius:6px;padding:8px;text-align:center;">
+                  <div style="font-size:9px;color:#8899aa;">NYS</div>
+                  <div style="font-size:16px;font-weight:700;color:#3498DB;">9.8%</div>
+                  <div style="font-size:9px;color:#8899aa;">poverty rate</div>
+                </div>
+              </div>
+              <!-- Chart placeholder -->
+              <div class="placeholder" style="height:70px;font-size:10px;">Trend line chart</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Sub-tabs in the sidebar</h3>
+      <p>The sidebar contains the indicator selector (radio buttons or mini-tabs) at the top, then the year slider and location checkboxes below. The main panel adapts to the selected indicator.</p>
+      <div style="margin-top:12px;">
+        <div class="mockup">
+          <div class="mockup-header">Stable Home tab</div>
+          <div class="mockup-body" style="display:flex;gap:0;padding:0;min-height:220px;">
+            <!-- Sidebar -->
+            <div style="width:140px;background:#1a2535;border-right:1px solid #2d3f55;padding:12px;flex-shrink:0;">
+              <div style="font-size:10px;color:#8899aa;margin-bottom:6px;">INDICATOR</div>
+              <div style="background:#3498DB;color:white;border-radius:4px;padding:5px 8px;font-size:10px;margin-bottom:3px;">● Poverty</div>
+              <div style="color:#8899aa;padding:5px 8px;font-size:10px;margin-bottom:3px;">○ Insurance</div>
+              <div style="color:#8899aa;padding:5px 8px;font-size:10px;margin-bottom:12px;">○ Family Structure</div>
+              <div style="font-size:10px;color:#8899aa;margin-bottom:6px;">YEAR RANGE</div>
+              <div style="background:#2d3f55;border-radius:4px;padding:6px;font-size:10px;color:#cdd6e0;margin-bottom:12px;">2010 — 2023</div>
+              <div style="font-size:10px;color:#8899aa;margin-bottom:6px;">LOCATION</div>
+              <div style="font-size:10px;color:#E74C3C;margin-bottom:3px;">☑ Geneva</div>
+              <div style="font-size:10px;color:#2ECC71;margin-bottom:3px;">☑ Ontario</div>
+              <div style="font-size:10px;color:#3498DB;margin-bottom:3px;">☑ NYS</div>
+            </div>
+            <!-- Main panel -->
+            <div style="flex:1;padding:12px;">
+              <!-- KPI boxes -->
+              <div style="display:flex;gap:6px;margin-bottom:10px;">
+                <div style="flex:1;background:#E74C3C22;border:1px solid #E74C3C44;border-radius:6px;padding:8px;text-align:center;">
+                  <div style="font-size:9px;color:#8899aa;">Geneva</div>
+                  <div style="font-size:16px;font-weight:700;color:#E74C3C;">15.2%</div>
+                  <div style="font-size:9px;color:#8899aa;">poverty rate</div>
+                </div>
+                <div style="flex:1;background:#2ECC7122;border:1px solid #2ECC7144;border-radius:6px;padding:8px;text-align:center;">
+                  <div style="font-size:9px;color:#8899aa;">Ontario</div>
+                  <div style="font-size:16px;font-weight:700;color:#2ECC71;">4.9%</div>
+                  <div style="font-size:9px;color:#8899aa;">poverty rate</div>
+                </div>
+                <div style="flex:1;background:#3498DB22;border:1px solid #3498DB44;border-radius:6px;padding:8px;text-align:center;">
+                  <div style="font-size:9px;color:#8899aa;">NYS</div>
+                  <div style="font-size:16px;font-weight:700;color:#3498DB;">9.8%</div>
+                  <div style="font-size:9px;color:#8899aa;">poverty rate</div>
+                </div>
+              </div>
+              <!-- Chart placeholder -->
+              <div class="placeholder" style="height:80px;font-size:10px;">Trend line chart</div>
+              <div class="placeholder" style="height:50px;margin-top:8px;font-size:10px;">Bar chart</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:20px;">Both share the same sidebar year slider and location checkboxes. The year range will auto-adjust per indicator (Family Structure caps at 2017; Poverty and Insurance go to 2023).</p>

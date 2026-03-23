@@ -1,0 +1,37 @@
+﻿Community,Source,Year,PCT
+City of Geneva,https://factfinder.census.gov/faces/tableservices/jsf/pages/productview.xhtml,2012,91.5
+NYS,https://factfinder.census.gov/faces/tableservices/jsf/pages/productview.xhtml,2012,88.7
+Ontario,https://factfinder.census.gov/faces/tableservices/jsf/pages/productview.xhtml,2012,91.9
+City of Geneva,https://factfinder.census.gov/bkmk/table/1.0/en/ACS/13_5YR/S2701/0400000US36|0500000US36069|0600000US3606928640|0600000US3606928651,2013,91.7
+NYS,https://factfinder.census.gov/bkmk/table/1.0/en/ACS/13_5YR/S2701/0400000US36|0500000US36069|0600000US3606928640|0600000US3606928651,2013,88.9
+Ontario,https://factfinder.census.gov/bkmk/table/1.0/en/ACS/13_5YR/S2701/0400000US36|0500000US36069|0600000US3606928640|0600000US3606928651,2013,91.7
+City of Geneva,https://factfinder.census.gov/bkmk/table/1.0/en/ACS/14_5YR/S2701/0400000US36|0500000US36069|0600000US3606928640|0600000US3606928651,2014,90.6
+NYS,https://factfinder.census.gov/bkmk/table/1.0/en/ACS/14_5YR/S2701/0400000US36|0500000US36069|0600000US3606928640|0600000US3606928651,2014,89.4
+Ontario,https://factfinder.census.gov/bkmk/table/1.0/en/ACS/14_5YR/S2701/0400000US36|0500000US36069|0600000US3606928640|0600000US3606928651,2014,92.1
+City of Geneva,https://factfinder.census.gov/bkmk/table/1.0/en/ACS/15_5YR/S2701/0400000US36|0500000US36069|0600000US3606928640|0600000US3606928651,2015,91.9
+NYS,https://factfinder.census.gov/bkmk/table/1.0/en/ACS/15_5YR/S2701/0400000US36|0500000US36069|0600000US3606928640|0600000US3606928651,2015,90.3
+Ontario,https://factfinder.census.gov/bkmk/table/1.0/en/ACS/15_5YR/S2701/0400000US36|0500000US36069|0600000US3606928640|0600000US3606928651,2015,93.2
+City of Geneva,https://factfinder.census.gov/bkmk/table/1.0/en/ACS/16_5YR/S2701/0400000US36|0500000US36069|0600000US3606928640|0600000US3606928651,2016,92.5
+NYS,https://factfinder.census.gov/bkmk/table/1.0/en/ACS/16_5YR/S2701/0400000US36|0500000US36069|0600000US3606928640|0600000US3606928651,2016,91.4
+Ontario,https://factfinder.census.gov/bkmk/table/1.0/en/ACS/16_5YR/S2701/0400000US36|0500000US36069|0600000US3606928640|0600000US3606928651,2016,94.2
+City of Geneva,https://factfinder.census.gov/bkmk/table/1.0/en/ACS/17_5YR/S2701/0400000US36|0500000US36069|0600000US3606928640|0600000US3606928651,2017,92.6
+NYS,https://factfinder.census.gov/bkmk/table/1.0/en/ACS/17_5YR/S2701/0400000US36|0500000US36069|0600000US3606928640|0600000US3606928651,2017,92.4
+Ontario,https://factfinder.census.gov/bkmk/table/1.0/en/ACS/17_5YR/S2701/0400000US36|0500000US36069|0600000US3606928640|0600000US3606928651,2017,95
+City of Geneva,https://data.census.gov/cedsci/table?q=&d=ACS%205-Year%20Estimates%20Data%20Profiles&table=DP03&tid=ACSDP5Y2018.DP03&g=0400000US36_1600000US3628640&lastDisplayedRow=120,2018,93.5
+NYS,https://data.census.gov/cedsci/table?q=&d=ACS%205-Year%20Estimates%20Data%20Profiles&table=DP03&tid=ACSDP5Y2018.DP03&g=0400000US36_1600000US3628640&lastDisplayedRow=120,2018,93.5
+Ontario,https://data.census.gov/cedsci/table?q=&d=ACS%205-Year%20Estimates%20Data%20Profiles&table=DP03&tid=ACSDP5Y2018.DP03&g=0400000US36_0500000US36069&lastDisplayedRow=114,2018,96
+City of Geneva,https://data.census.gov/cedsci/table?g=0400000US36_0500000US36069_1600000US3628640&d=ACS%205-Year%20Estimates%20Data%20Profiles&tid=ACSDP5Y2019.DP03,2019,94.6
+NYS,https://data.census.gov/cedsci/table?g=0400000US36_0500000US36069_1600000US3628640&d=ACS%205-Year%20Estimates%20Data%20Profiles&tid=ACSDP5Y2019.DP03,2019,94.2
+Ontario,https://data.census.gov/cedsci/table?g=0400000US36_0500000US36069_1600000US3628640&d=ACS%205-Year%20Estimates%20Data%20Profiles&tid=ACSDP5Y2019.DP03,2019,96.7
+City of Geneva,https://data.census.gov/cedsci/table?g=0400000US36_0500000US36069_1600000US3628640&d=ACS%205-Year%20Estimates%20Data%20Profiles&tid=ACSDP5Y2020.DP03,2020,95.1
+NYS,https://data.census.gov/cedsci/table?g=0400000US36_0500000US36069_1600000US3628640&d=ACS%205-Year%20Estimates%20Data%20Profiles&tid=ACSDP5Y2020.DP03,2020,94.6
+Ontario,https://data.census.gov/cedsci/table?g=0400000US36_0500000US36069_1600000US3628640&d=ACS%205-Year%20Estimates%20Data%20Profiles&tid=ACSDP5Y2020.DP03,2020,96.7
+City of Geneva,https://data.census.gov/table?g=0400000US36_0500000US36069_1600000US3628640&d=ACS+5-Year+Estimates+Data+Profiles&tid=ACSDP5Y2021.DP03&moe=false,2021,95
+NYS,https://data.census.gov/table?g=0400000US36_0500000US36069_1600000US3628640&d=ACS+5-Year+Estimates+Data+Profiles&tid=ACSDP5Y2021.DP03&moe=false,2021,94.7
+Ontario,https://data.census.gov/table?g=0400000US36_0500000US36069_1600000US3628640&d=ACS+5-Year+Estimates+Data+Profiles&tid=ACSDP5Y2021.DP03&moe=false,2021,96.6
+City of Geneva,https://data.census.gov/table/ACSDP5Y2022.DP03?g=160XX00US3628640_050XX00US36069_040XX00US36&d=ACS%205-Year%20Estimates%20Data%20Profiles,2022,95.5
+NYS,https://data.census.gov/table/ACSDP5Y2022.DP03?g=160XX00US3628640_050XX00US36069_040XX00US36&d=ACS%205-Year%20Estimates%20Data%20Profiles,2022,94.8
+Ontario,https://data.census.gov/table/ACSDP5Y2022.DP03?g=160XX00US3628640_050XX00US36069_040XX00US36&d=ACS%205-Year%20Estimates%20Data%20Profiles,2022,96.7
+City of Geneva,https://data.census.gov/table/ACSDP5Y2023.DP03?g=160XX00US3628640_050XX00US36069_040XX00US36&d=ACS%205-Year%20Estimates%20Data%20Profiles,2023,96
+NYS,https://data.census.gov/table/ACSDP5Y2023.DP03?g=160XX00US3628640_050XX00US36069_040XX00US36&d=ACS%205-Year%20Estimates%20Data%20Profiles,2023,94.9
+Ontario,https://data.census.gov/table/ACSDP5Y2023.DP03?g=160XX00US3628640_050XX00US36069_040XX00US36&d=ACS%205-Year%20Estimates%20Data%20Profiles,2023,96.8
