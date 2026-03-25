@@ -83,3 +83,44 @@ family_df <- family_raw %>%
 
 family_year_min <- min(family_df$Year, na.rm = TRUE)
 family_year_max <- max(family_df$Year, na.rm = TRUE)
+
+# ── Income ───────────────────────────────────────────────
+income <- read_csv(
+  here::here("data", "raw_data", "stable home", "Income.csv"),
+  col_types = cols(.default = col_character())
+) |>
+  mutate(
+    Year   = as.integer(Year),
+    Income = as.numeric(gsub(",", "", Income))
+  ) |>
+  select(-Yr, -Source) |>
+  rename(Location = "Community")
+
+# ── Population ───────────────────────────────────────────
+population <- read_csv(
+  here::here("data", "raw_data", "stable home", "Population.csv"),
+  col_types = cols(.default = col_character())
+) |>
+  mutate(
+    Year       = as.integer(Year),
+    Population = as.numeric(gsub(",", "", Population))
+  ) |>
+  select(-Source)
+
+# ── Merge and compute indices (base year = 2014) ────────
+pop_income <- income |>
+  left_join(population, by = c("Year", "Location"))
+
+pop_income_index <- pop_income |>
+  filter(Year >= 2014) |>
+  group_by(Location) |>
+  mutate(
+    base_income      = Income[Year == 2014],
+    income_index     = (Income / base_income) * 100,
+    base_population  = Population[Year == 2014],
+    population_index = (Population / base_population) * 100
+  ) |>
+  ungroup()
+
+pi_year_min <- min(pop_income_index$Year, na.rm = TRUE)
+pi_year_max <- max(pop_income_index$Year, na.rm = TRUE)

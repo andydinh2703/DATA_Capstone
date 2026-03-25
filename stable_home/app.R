@@ -1,14 +1,13 @@
 # ──────────────────────────────────────────────────────────
-# app.R — Stable Home Dashboard
+# app.R — Stable Home Module Functions
+# Provides: make_sh_tab_ui, make_sh_tab_server
 # ──────────────────────────────────────────────────────────
-
-source("global.R")
 
 # ── Helper: build one tab's UI ───────────────────────────
 # year_min / year_max: passed explicitly — each sub-tab has its own range
 # extra_controls: optional function(ns) returning a UI element appended to
 #   the sidebar. Must be a function so input IDs are namespaced correctly.
-make_tab_ui <- function(id, label, year_min, year_max,
+make_sh_tab_ui <- function(id, label, year_min, year_max,
                         rate_label, extra_controls = NULL) {
   ns <- NS(id)
   nav_panel(
@@ -69,7 +68,7 @@ make_tab_ui <- function(id, label, year_min, year_max,
 
 # ── Helper: build one tab's server logic ─────────────────
 # extra_filter: optional function(df, input) applied after year/location filter
-make_tab_server <- function(id, data, rate_col, rate_label,
+make_sh_tab_server <- function(id, data, rate_col, rate_label,
                             extra_filter = NULL) {
   moduleServer(id, function(input, output, session) {
 
@@ -246,83 +245,3 @@ make_tab_server <- function(id, data, rate_col, rate_label,
     })
   })
 }
-
-# ════════════════════════════════════════════════════════
-# UI
-# ════════════════════════════════════════════════════════
-ui <- page_navbar(
-  title = "Stable Home",
-  theme = bs_theme(version = 5),
-  nav_spacer(),
-  nav_panel(
-    "Stable Home",
-    navset_pill(
-      make_tab_ui(
-        id         = "poverty",
-        label      = "Poverty",
-        year_min   = poverty_year_min,
-        year_max   = poverty_year_max,
-        rate_label = "Family Poverty Rate"
-      ),
-      make_tab_ui(
-        id         = "insurance",
-        label      = "Health Insurance",
-        year_min   = insurance_year_min,
-        year_max   = insurance_year_max,
-        rate_label = "Insurance Coverage"
-      ),
-      make_tab_ui(
-        id         = "family",
-        label      = "Family Structure",
-        year_min   = family_year_min,
-        year_max   = family_year_max,
-        rate_label = "% of Households",
-        extra_controls = function(ns) {
-          checkboxGroupInput(
-            ns("family_types"),
-            label    = "Household Type",
-            choices  = c("Two parents", "Single mother", "Single father"),
-            selected = c("Two parents", "Single mother", "Single father")
-          )
-        }
-      )
-    )
-  )
-)
-
-# ════════════════════════════════════════════════════════
-# Server
-# ════════════════════════════════════════════════════════
-server <- function(input, output, session) {
-
-  make_tab_server(
-    id         = "poverty",
-    data       = poverty_df,
-    rate_col   = "PCT",
-    rate_label = "Family Poverty Rate"
-  )
-
-  make_tab_server(
-    id         = "insurance",
-    data       = insurance_df,
-    rate_col   = "PCT",
-    rate_label = "Insurance Coverage"
-  )
-
-  make_tab_server(
-    id         = "family",
-    data       = family_df,
-    rate_col   = "PCT",
-    rate_label = "% of Households",
-    extra_filter = function(df, input) {
-      req(length(input$family_types) > 0)
-      df %>% filter(Type %in% input$family_types)
-    }
-  )
-
-}
-
-# ════════════════════════════════════════════════════════
-# Run
-# ════════════════════════════════════════════════════════
-shinyApp(ui, server)
