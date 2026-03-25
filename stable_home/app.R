@@ -89,7 +89,7 @@ make_sh_tab_server <- function(id, data, rate_col, rate_label,
       max(filtered()$Year)
     })
 
-    # ── KPI value for a single location ──
+    # ── KPI value (average within filtered range) ──
     kpi_val <- function(loc) {
       df <- filtered()
       # For family structure (has Type column), show value for first selected type
@@ -97,9 +97,9 @@ make_sh_tab_server <- function(id, data, rate_col, rate_label,
           length(input$family_types) > 0) {
         df <- df %>% filter(Type == input$family_types[1])
       }
-      d <- df %>% filter(Location == loc, Year == latest_year())
+      d <- df %>% filter(Location == loc)
       if (nrow(d) == 0) return("—")
-      paste0(round(d[[rate_col]][1], 1), "%")
+      paste0(round(mean(d[[rate_col]], na.rm = TRUE), 1), "%")
     }
 
     output$kpi_geneva  <- renderText(kpi_val("Geneva"))

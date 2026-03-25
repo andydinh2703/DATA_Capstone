@@ -8,9 +8,9 @@ source("global.R")
 # UI
 # ════════════════════════════════════════════════════════
 ui <- bslib::page_fluid(
-  mainPanel(titlePanel("Ready, Set, GROW!"),
-            tabsetPanel(
-              id = "tabset",
+  titlePanel("Ready, Set, GROW!"),
+  tabsetPanel(
+    id = "tabset",
 
               # ── Overview Tab ─────────────────────────────
               tabPanel("Overview",
@@ -76,13 +76,20 @@ ui <- bslib::page_fluid(
                            id    = "inc_index",
                            label = "Income Index",
                            show_description = FALSE
+                         ),
+                         make_snap_tanf_ui(
+                           id    = "snap",
+                           label = "SNAP"
+                         ),
+                         make_snap_tanf_ui(
+                           id    = "tanf",
+                           label = "TANF"
                          )
                        )
               ),
 
               # ── Ready Mind Tab ───────────────────────────
               tabPanel("Ready Mind")
-            )
   )
 )
 
@@ -185,6 +192,10 @@ server <- function(input, output, session) {
   make_pi_server(
     "inc_index", pop_income_index, "income_index", "Income Index"
   )
+
+  # ── SNAP / TANF ────────────────────────────────────────
+  make_snap_tanf_server("snap", "SNAP")
+  make_snap_tanf_server("tanf", "TANF")
 }
 
 shinyApp(ui, server)

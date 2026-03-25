@@ -124,3 +124,33 @@ pop_income_index <- pop_income |>
 
 pi_year_min <- min(pop_income_index$Year, na.rm = TRUE)
 pi_year_max <- max(pop_income_index$Year, na.rm = TRUE)
+
+# ── SNAP / TANF ──────────────────────────────────────────
+snap_raw <- read_csv(
+  here::here("data", "raw_data", "stable home", "SnapOCDoSS.csv"),
+  col_types = cols(.default = col_character())
+)
+
+snap_data <- snap_raw %>%
+  select(-matches("^X"), -matches("^\\.\\.\\.")) %>%
+  mutate(across(
+    c(AllHouseholds, `Households w Child Under 18`,
+      TANF, SNAP, SNAPPCT, TANFPCT),
+    ~ suppressWarnings(as.numeric(.))
+  )) %>%
+  mutate(
+    Community = str_trim(Community),
+    Year = as.integer(Year)
+  ) %>%
+  filter(!is.na(Year))
+
+snap_communities <- sort(unique(snap_data$Community))
+snap_year_min    <- min(as.integer(snap_data$Year), na.rm = TRUE)
+snap_year_max    <- max(as.integer(snap_data$Year), na.rm = TRUE)
+
+community_colors <- c(
+  "Geneva"            = "#E74C3C",
+  "Ontario"           = "#2ECC71",
+  "Geneva Town"       = "#9B59B6",
+  "Ontario wo Geneva" = "#3498DB"
+)
