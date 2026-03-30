@@ -75,15 +75,10 @@ make_im_server <- function(id, data, rate_col, rate_label) {
         )
     })
 
-    latest_year <- reactive({
-      req(nrow(filtered()) > 0)
-      max(filtered()$Year)
-    })
-
     kpi_val <- function(loc) {
-      d <- filtered() %>% filter(Location == loc, Year == latest_year())
+      d <- filtered() %>% filter(Location == loc)
       if (nrow(d) == 0) return("—")
-      paste0(d[[rate_col]], "%")
+      paste0(round(mean(d[[rate_col]], na.rm = TRUE), 1), " per 1,000")
     }
 
     output$kpi_geneva  <- renderText(kpi_val("Geneva"))
@@ -101,7 +96,7 @@ make_im_server <- function(id, data, rate_col, rate_label) {
           text = paste0(
             "<b>", Location, "</b><br>",
             "Year: ", Year, "<br>",
-            rate_label, ": ", .data[[rate_col]], "%"
+            rate_label, ": ", .data[[rate_col]], " per 1,000"
           )
         )) +
         geom_line(linewidth = 1.1) +
@@ -110,7 +105,7 @@ make_im_server <- function(id, data, rate_col, rate_label) {
         scale_x_continuous(breaks = seq(year_min, year_max, 1)) +
         labs(
           x     = "Year",
-          y     = paste0(rate_label, " (%)"),
+          y     = paste0(rate_label, " (per 1,000 births)"),
           color = NULL
         ) +
         theme_minimal(base_size = 13) +
@@ -138,7 +133,7 @@ make_im_server <- function(id, data, rate_col, rate_label) {
           text = paste0(
             "<b>", Location, "</b><br>",
             "Year: ", Year, "<br>",
-            rate_label, ": ", .data[[rate_col]], "%"
+            rate_label, ": ", .data[[rate_col]], " per 1,000"
           )
         )) +
         geom_col(position = position_dodge(width = 0.8), width = 0.7) +

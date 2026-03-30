@@ -25,39 +25,37 @@ ui <- bslib::page_fluid(
 
               # ── Healthy Born Tab ─────────────────────────
               tabPanel("Healthy Born",
-                       uiOutput("dynamic_header"),
-                       fluidRow(
-                         column(6,
-                                actionButton("infant", "Infant Mortality", class = "primary")),
-                         column(6,
-                                actionButton("low_birth_weight", "Low Birth Weight", class = "success"))
-                       ),
-                       br(),
-                       uiOutput("dynamic_plot")),
+                       navset_pill(
+                         make_im_ui("im", "Infant Mortality"),
+                         make_lbw_ui("lbw", "Low Birth Weight")
+                       )),
 
               # ── Stable Home Tab ──────────────────────────
               tabPanel("Stable Home",
                        navset_pill(
                          make_sh_tab_ui(
-                           id         = "poverty",
-                           label      = "Poverty",
-                           year_min   = poverty_year_min,
-                           year_max   = poverty_year_max,
-                           rate_label = "Family Poverty Rate"
+                           id                 = "poverty",
+                           label              = "Poverty",
+                           year_min           = poverty_year_min,
+                           year_max           = poverty_year_max,
+                           rate_label         = "Family Poverty Rate",
+                           bottom_chart_label = "Change Over Selected Period"
                          ),
                          make_sh_tab_ui(
-                           id         = "insurance",
-                           label      = "Health Insurance",
-                           year_min   = insurance_year_min,
-                           year_max   = insurance_year_max,
-                           rate_label = "Insurance Coverage"
+                           id                 = "insurance",
+                           label              = "Health Insurance",
+                           year_min           = insurance_year_min,
+                           year_max           = insurance_year_max,
+                           rate_label         = "Insurance Coverage",
+                           bottom_chart_label = "Change Over Selected Period"
                          ),
                          make_sh_tab_ui(
-                           id         = "family",
-                           label      = "Family Structure",
-                           year_min   = family_year_min,
-                           year_max   = family_year_max,
-                           rate_label = "% of Households",
+                           id                 = "family",
+                           label              = "Family Structure",
+                           year_min           = family_year_min,
+                           year_max           = family_year_max,
+                           rate_label         = "% of Households",
+                           bottom_chart_label = "Trends by Household Type",
                            extra_controls = function(ns) {
                              checkboxGroupInput(
                                ns("family_types"),
@@ -138,20 +136,6 @@ server <- function(input, output, session) {
   })
 
   # ── Healthy Born Tab ───────────────────────────────────
-  current_view <- reactiveVal("low_birth_weight")
-  observeEvent(input$infant, {
-    current_view("infant")
-  })
-  observeEvent(input$low_birth_weight, {
-    current_view("low_birth_weight")
-  })
-  output$dynamic_plot <- renderUI({
-    if(current_view() == "infant") {
-      make_im_ui("im", "Infant Mortality")
-    } else {
-      make_lbw_ui("lbw")
-    }
-  })
   make_im_server(
     "im", data = im, rate_col = "Rate", rate_label = "Infant Mortality Rate"
   )

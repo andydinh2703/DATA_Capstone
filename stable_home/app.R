@@ -8,7 +8,8 @@
 # extra_controls: optional function(ns) returning a UI element appended to
 #   the sidebar. Must be a function so input IDs are namespaced correctly.
 make_sh_tab_ui <- function(id, label, year_min, year_max,
-                        rate_label, extra_controls = NULL) {
+                        rate_label, extra_controls = NULL,
+                        bottom_chart_label = "Year-by-Year Comparison") {
   ns <- NS(id)
   nav_panel(
     title = label,
@@ -59,8 +60,8 @@ make_sh_tab_ui <- function(id, label, year_min, year_max,
         plotlyOutput(ns("line_chart"), height = "380px")
       ),
       card(
-        card_header("Year-by-Year Comparison"),
-        plotlyOutput(ns("bar_chart"), height = "320px")
+        card_header(bottom_chart_label),
+        plotlyOutput(ns("comparison_chart"), height = "320px")
       )
     )
   )
@@ -180,67 +181,82 @@ make_sh_tab_server <- function(id, data, rate_col, rate_label,
         config(displayModeBar = FALSE)
     })
 
-    # ── Bar chart ────────────────────────────────────────
-    output$bar_chart <- renderPlotly({
-      req(nrow(filtered()) > 0)
-      has_type <- "Type" %in% names(filtered())
+    # ── Comparison chart (slope or small multiples) ──────
+    output$comparison_chart <- renderPlotly({
+      df <- filtered()
+      req(nrow(df) > 0)
 
-      if (has_type) {
-        p <- filtered() %>%
+      if ("Type" %in% names(df)) {
+        # ── Small multiples: faceted line chart by household type ──
+        p <- df %>%
+          mutate(line_color = if_else(Location == "Geneva", "Geneva", "Other")) %>%
           ggplot(aes(
-            x     = factor(Year),
+            x     = Year,
             y     = .data[[rate_col]],
-            fill  = Location,
-            alpha = Type,
+            group = Location,
+            color = line_color,
             text  = paste0(
-              "<b>", Location, " \u2014 ", Type, "</b><br>",
-              "Year: ", Year, "<br>",
-              rate_label, ": ", .data[[rate_col]], "%"
-            )
-          )) +
-          geom_col(position = position_dodge(width = 0.8), width = 0.7) +
-          scale_fill_manual(values = location_colors) +
-          scale_alpha_manual(
-            values = c(
-              "Two parents"   = 1.0,
-              "Single mother" = 0.65,
-              "Single father" = 0.35
-            )
-          )
-      } else {
-        p <- filtered() %>%
-          ggplot(aes(
-            x    = factor(Year),
-            y    = .data[[rate_col]],
-            fill = Location,
-            text = paste0(
               "<b>", Location, "</b><br>",
               "Year: ", Year, "<br>",
+              "Type: ", Type, "<br>",
               rate_label, ": ", .data[[rate_col]], "%"
             )
           )) +
-          geom_col(position = position_dodge(width = 0.8), width = 0.7) +
-          scale_fill_manual(values = location_colors)
+          geom_line(linewidth = 1) +
+          geom_point(size = 2) +
+          facet_wrap(~ Type, ncol = 3) +
+          scale_color_manual(values = c("Geneva" = "#E74C3C", "Other" = "#BBBBBB")) +
+          scale_x_continuous(breaks = \(x) pretty(x, n = 4)) +
+          labs(x = "Year", y = paste0(rate_label, " (%)"), color = NULL) +
+          theme_minimal(base_size = 13) +
+          theme(
+            legend.position = "none",
+            axis.text.x     = element_text(angle = 45, hjust = 1, size = 9),
+            strip.text      = element_text(face = "bold", size = 11),
+            panel.spacing   = unit(1, "lines")
+          )
+      } else {
+        # ── Slope chart: first vs last year per location ──
+        start_yr <- min(df$Year)
+        end_yr   <- max(df$Year)
+        req(start_yr < end_yr)
+
+        slope_df <- df %>%
+          group_by(Location) %>%
+          filter(Year == start_yr | Year == end_yr) %>%
+          mutate(endpoint = factor(Year, levels = c(start_yr, end_yr))) %>%
+          ungroup()
+
+        slope_colors <- c("Geneva" = "#E74C3C", "Ontario" = "#BBBBBB", "NYS" = "#BBBBBB")
+
+        p <- ggplot(slope_df,
+                    aes(
+                      x     = endpoint,
+                      y     = .data[[rate_col]],
+                      group = Location,
+                      color = Location,
+                      text  = paste0(
+                        "<b>", Location, "</b><br>",
+                        "Year: ", Year, "<br>",
+                        rate_label, ": ", .data[[rate_col]], "%"
+                      )
+                    )) +
+          geom_line(linewidth = 1) +
+          geom_point(size = 3.5) +
+          geom_text(aes(label = paste0(.data[[rate_col]], "%")),
+                    vjust = -1, size = 3.5, show.legend = FALSE) +
+          scale_color_manual(values = slope_colors) +
+          labs(x = NULL, y = paste0(rate_label, " (%)"), color = NULL) +
+          theme_minimal(base_size = 13) +
+          theme(
+            panel.grid.major.x = element_blank(),
+            legend.position    = "top",
+            axis.text          = element_text(size = 12, face = "bold")
+          )
       }
 
-      p <- p +
-        labs(
-          x     = "Year",
-          y     = paste0(rate_label, " (%)"),
-          fill  = NULL,
-          alpha = NULL
-        ) +
-        theme_minimal(base_size = 13) +
-        theme(
-          legend.position  = "top",
-          panel.grid.minor = element_blank()
-        )
-
       ggplotly(p, tooltip = "text") %>%
-        layout(
-          legend    = list(orientation = "h", x = 0.5, xanchor = "center", y = 1.12),
-          hovermode = "closest"
-        ) %>%
+        layout(hovermode = "closest") %>%
         config(displayModeBar = FALSE)
     })
   })

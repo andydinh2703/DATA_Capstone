@@ -5,19 +5,27 @@
 # ──────────────────────────────────────────────────────────
 
 # ── UI module ────────────────────────────────────────────
-make_lbw_ui <- function(id) {
+make_lbw_ui <- function(id, label) {
   ns <- NS(id)
-  tagList(
-    titlePanel("Exploring Low Birth Weight Across New York State"),
-    sliderInput(
-      ns("year"), "What year would you like to explore?",
-      min = lbw_county_year_min, max = lbw_county_year_max,
-      value = lbw_county_year_min, sep = "", step = 1, ticks = FALSE
-    ),
-    p("This heat map displays the percentage of babies born with a low birth weight
-        (<2500g) for each county in New York State. Ontario County, which is where the
-        city of Geneva is located, is outlined in red."),
-    plotOutput(ns("map"))
+  nav_panel(
+    title = label,
+    layout_sidebar(
+      sidebar = sidebar(
+        width = 280,
+        sliderInput(
+          ns("year"), "What year would you like to explore?",
+          min = lbw_county_year_min, max = lbw_county_year_max,
+          value = lbw_county_year_min, sep = "", step = 1, ticks = FALSE
+        ),
+        p("This heat map displays the percentage of babies born with a low birth weight
+          (<2500g) for each county in New York State. Ontario County, which is where the
+          city of Geneva is located, is outlined in red.")
+      ),
+      card(
+        card_header("Low Birth Weight by County"),
+        plotOutput(ns("map"), height = "550px")
+      )
+    )
   )
 }
 
