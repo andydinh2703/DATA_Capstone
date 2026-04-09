@@ -180,3 +180,19 @@ Separated each file into two files with a consistent `_dev.R` naming convention:
 
 Added `library(leaflet)` and `library(htmltools)` to support the new interactive map
 in the LBW module. Inserted after `library(plotly)`, before `library(tigris)`.
+
+---
+
+## 3. Population & Income — Combined into Single Tab
+
+**Files changed:** `stable_home/pop_incom.R`, `stable_home/pop_incom_dev.R`, `main/app.R`
+
+### Problem
+The original design used two separate pill tabs ("Population Index" and "Income Index") with identical controls (year slider, location filter). This was redundant since both charts share the same axes and filter logic.
+
+### Fix
+Merged into a single "Population & Income Index" tab with a `radioButtons` toggle to switch between the two variables. The module API simplified:
+- `make_pi_ui(id, label)` — no longer needs `show_description`, `y_var`, or `y_label` parameters
+- `make_pi_server(id, data)` — `y_var` and `y_label` are now internal reactives driven by `input$variable`
+- Description card is always shown (no longer conditional)
+- `main/app.R` updated from two `make_pi_ui`/`make_pi_server` calls to one each (id: `"pi"`)
