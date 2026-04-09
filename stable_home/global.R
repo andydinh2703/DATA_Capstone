@@ -113,6 +113,7 @@ pop_income <- income |>
 
 pop_income_index <- pop_income |>
   filter(Year >= 2014) |>
+  mutate(Location = recode(Location, "City of Geneva" = "Geneva")) |>
   group_by(Location) |>
   mutate(
     base_income      = Income[Year == 2014],
