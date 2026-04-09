@@ -196,3 +196,19 @@ Merged into a single "Population & Income Index" tab with a `radioButtons` toggl
 - `make_pi_server(id, data)` — `y_var` and `y_label` are now internal reactives driven by `input$variable`
 - Description card is always shown (no longer conditional)
 - `main/app.R` updated from two `make_pi_ui`/`make_pi_server` calls to one each (id: `"pi"`)
+
+---
+
+## 4. SNAP & TANF — Combined into Single Tab
+
+**Files changed:** `stable_home/snap_tanf.R`, `stable_home/snap_tanf_dev.R`, `main/app.R`
+
+### Problem
+SNAP and TANF shared identical controls (community filter, count/percent toggle, year slider) and the same chart types. Having two separate tabs was redundant.
+
+### Fix
+Merged into a single "SNAP & TANF" tab with a `radioButtons` toggle to switch between programs. The module API simplified:
+- `make_snap_tanf_server(id)` — `program` parameter removed; `metric_col` and `pct_col` are now internal reactives driven by `input$program`
+- `make_snap_tanf_ui(id, label)` — unchanged signature; `radioButtons(ns("program"))` added as first sidebar control
+- `main/app.R` updated from two calls to one each (id: `"snap_tanf"`)
+- New `snap_tanf_dev.R` standalone test app created
