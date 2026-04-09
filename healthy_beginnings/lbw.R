@@ -58,19 +58,28 @@ make_lbw_server <- function(id, data) {
     all_data <- reactive({
       data |>
         filter(!sf::st_is_empty(geometry)) |>
+        sf::st_drop_geometry() |>
         mutate(highlight = ifelse(County == "Ontario", "Ontario", "Other"))
     })
 
+    # Render base map once — tiles and viewport are set here and never reset
     output$map <- renderLeaflet({
-      df <- filtered_data()
+      leaflet() |>
+        addProviderTiles("CartoDB.Positron")
+    })
+
+    # Update polygons and legend reactively without rebuilding the whole map
+    observe({
+      df  <- filtered_data()
       pal <- colorNumeric("viridis", domain = df$percentage, na.color = "transparent")
       labels <- sprintf(
         "<strong>%s</strong><br/>%0.1f%% low birth weight",
         df$County, df$percentage
       ) |> lapply(htmltools::HTML)
 
-      leaflet(df) |>
-        addProviderTiles("CartoDB.Positron") |>
+      leafletProxy(session$ns("map"), data = df) |>
+        clearShapes() |>
+        clearControls() |>
         addPolygons(
           fillColor    = ~pal(percentage),
           color        = "black",
