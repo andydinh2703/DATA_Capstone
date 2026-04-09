@@ -1,6 +1,8 @@
 # ──────────────────────────────────────────────────────────
 # snap_tanf.R — SNAP / TANF Module Functions
 # Provides: make_snap_tanf_ui, make_snap_tanf_server
+# Data objects (snap_data, snap_communities, snap_year_min/max,
+# community_colors) loaded by stable_home/global.R
 # ──────────────────────────────────────────────────────────
 
 # ── Helper: line chart ───────────────────────────────────
@@ -56,7 +58,10 @@ snap_kpi <- function(df, community, metric) {
   }
 }
 
-# ── UI builder ───────────────────────────────────────────
+# ── UI module ────────────────────────────────────────────
+# make_snap_tanf_ui: builds a single nav_panel tab for SNAP & TANF.
+#   id    — Shiny module ID (must match make_snap_tanf_server call)
+#   label — text shown on the pill tab (e.g. "SNAP & TANF")
 make_snap_tanf_ui <- function(id, label) {
   ns <- NS(id)
   nav_panel(
@@ -64,6 +69,11 @@ make_snap_tanf_ui <- function(id, label) {
     layout_sidebar(
       sidebar = sidebar(
         width = 280,
+        radioButtons(
+          ns("program"), "Program",
+          choices  = c("SNAP", "TANF"),
+          selected = "SNAP"
+        ),
         checkboxGroupInput(
           ns("community"), "Communities",
           choices  = snap_communities,
@@ -125,16 +135,18 @@ make_snap_tanf_ui <- function(id, label) {
   )
 }
 
-# ── Server ───────────────────────────────────────────────
-make_snap_tanf_server <- function(id, program) {
-  # program: "SNAP" or "TANF"
-  metric_col <- program
-  pct_col    <- paste0(program, "PCT")
-
+# ── Server module ─────────────────────────────────────────
+# make_snap_tanf_server: handles reactivity for the combined SNAP & TANF tab.
+#   id — Shiny module ID (must match make_snap_tanf_ui call)
+#   Program (SNAP or TANF) is selected via input$program radio button.
+make_snap_tanf_server <- function(id) {
   moduleServer(id, function(input, output, session) {
 
+    metric_col <- reactive({ input$program })
+    pct_col    <- reactive({ paste0(input$program, "PCT") })
+
     active_col <- reactive({
-      if (input$metric == "count") metric_col else pct_col
+      if (input$metric == "count") metric_col() else pct_col()
     })
 
     filtered <- reactive({
@@ -146,15 +158,15 @@ make_snap_tanf_server <- function(id, program) {
         )
     })
 
-    # ── KPIs (average within year range) ─────────────────
+    # ── KPIs ─────────────────────────────────────────────
     output$kpi_geneva      <- renderText(snap_kpi(filtered(), "Geneva",            active_col()))
     output$kpi_ontario     <- renderText(snap_kpi(filtered(), "Ontario",           active_col()))
     output$kpi_geneva_town <- renderText(snap_kpi(filtered(), "Geneva Town",       active_col()))
     output$kpi_ontario_wo  <- renderText(snap_kpi(filtered(), "Ontario wo Geneva", active_col()))
 
     # ── Chart titles ─────────────────────────────────────
-    output$line_title  <- renderText(paste(program, "Trend Over Time"))
-    output$slope_title <- renderText(paste(program, "% Change from First Year"))
+    output$line_title  <- renderText(paste(input$program, "Trend Over Time"))
+    output$slope_title <- renderText(paste(input$program, "% Change from First Year"))
 
     # ── Line chart ───────────────────────────────────────
     output$line_chart <- renderPlotly({
