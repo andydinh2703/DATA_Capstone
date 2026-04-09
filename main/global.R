@@ -7,6 +7,8 @@ library(tidyverse)
 library(shiny)
 library(bslib)
 library(plotly)
+library(leaflet)
+library(htmltools)
 library(tigris)
 library(sf)
 
