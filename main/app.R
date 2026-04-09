@@ -70,12 +70,8 @@ ui <- bslib::page_fluid(
                            label = "Population & Income Index"
                          ),
                          make_snap_tanf_ui(
-                           id    = "snap",
-                           label = "SNAP"
-                         ),
-                         make_snap_tanf_ui(
-                           id    = "tanf",
-                           label = "TANF"
+                           id    = "snap_tanf",
+                           label = "SNAP & TANF"
                          )
                        )
               ),
@@ -166,8 +162,7 @@ server <- function(input, output, session) {
   make_pi_server("pi", pop_income_index)
 
   # ── SNAP / TANF ────────────────────────────────────────
-  make_snap_tanf_server("snap", "SNAP")
-  make_snap_tanf_server("tanf", "TANF")
+  make_snap_tanf_server("snap_tanf")
 }
 
 shinyApp(ui, server)
