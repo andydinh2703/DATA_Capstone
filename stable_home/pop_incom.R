@@ -40,9 +40,7 @@ make_pi_ui <- function(id, label, show_description = FALSE) {
         card(
           style = "margin-top: 10px;",
           p(strong("Population and Income Index: "),
-            "The population and income index variables represented on the y-axes show how each
-            location has changed over time, relative to the baseline year (2014). Values greater
-            than 100 show an increase since 2014, while values below 100 indicate a decrease.")
+            "The population and income index variables represented on the y-axes show how each location has changed over time, relative to the baseline year (2014). Values greater than 100 show an increase since 2014, while values below 100 indicate a decrease.")
         )
       }
     )
