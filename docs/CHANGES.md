@@ -126,3 +126,57 @@ skills-lock.json
 ```
 
 `.claude` and `.skills-lock.json` were already present. The `.agents/` directory (containing superpowers skill files installed via `npx skills add`) and `skills-lock.json` were staged accidentally and have been removed from the index.
+
+---
+
+# Changelog — 2026-04-09
+
+Summary of all changes made to the Ready, Set, GROW! Shiny dashboard in this session.
+
+---
+
+## 1. Module/Dev-App Split — lbw.R and pop_incom.R
+
+**Files changed:** `healthy_beginnings/lbw.R`, `healthy_beginnings/lbw_dev.R`,
+`stable_home/pop_incom.R`, `stable_home/pop_incom_dev.R`, `main/global.R`
+
+### Problem
+Both `lbw.R` and `pop_incom.R` were developed as standalone Shiny apps in Posit Cloud.
+When saved and synced to the repo, they contained `shinyApp()` calls at the bottom and
+replaced the module functions (`make_lbw_ui`, `make_pi_ui`, etc.) the main app depends on.
+This caused the main app to crash on startup because sourcing these files triggered a
+standalone app launch instead of registering the module functions.
+
+### Solution
+Separated each file into two files with a consistent `_dev.R` naming convention:
+
+- **Module file** (`lbw.R`, `pop_incom.R`): exports only `make_X_ui` / `make_X_server`.
+  No `library()` calls, no top-level data, no `shinyApp()`. Safe to source from `main/global.R`.
+- **Dev app** (`lbw_dev.R`, `pop_incom_dev.R`): standalone test app that loads all libraries,
+  sources the module, and calls `shinyApp()`. Run directly in RStudio for isolated testing.
+  NOT sourced by the main app.
+
+### New features brought from Posit into the modules
+
+#### lbw.R
+- **Leaflet interactive map** replaces the static `ggplot + geom_sf()` map.
+  Uses `colorNumeric("viridis")` fill, hover labels, and a red outline for Ontario County.
+  Uses `leafletProxy` so the map doesn't rebuild on every slider change — only polygons update.
+- **Plotly trend line chart** added alongside the map. Shows all NY counties in grey with
+  Ontario highlighted in red.
+- UI layout changed to `layout_columns(col_widths = c(6, 6))` to show map and chart side by side.
+- `leaflet` and `htmltools` added to `main/global.R` as new dependencies.
+
+#### pop_incom.R
+- **Location checkbox** (`checkboxGroupInput`) added to the sidebar, consistent with
+  `infant_mortality.R` and `snap_tanf.R`. Allows filtering by Geneva / Ontario / NYS.
+- `filtered_data` reactive now filters by both year range and selected locations.
+
+---
+
+## 2. main/global.R — New Dependencies
+
+**File changed:** `main/global.R`
+
+Added `library(leaflet)` and `library(htmltools)` to support the new interactive map
+in the LBW module. Inserted after `library(plotly)`, before `library(tigris)`.
