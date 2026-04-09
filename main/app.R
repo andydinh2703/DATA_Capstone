@@ -66,14 +66,8 @@ ui <- bslib::page_fluid(
                            }
                          ),
                          make_pi_ui(
-                           id    = "pop_index",
-                           label = "Population Index",
-                           show_description = TRUE
-                         ),
-                         make_pi_ui(
-                           id    = "inc_index",
-                           label = "Income Index",
-                           show_description = FALSE
+                           id    = "pi",
+                           label = "Population & Income Index"
                          ),
                          make_snap_tanf_ui(
                            id    = "snap",
@@ -169,13 +163,7 @@ server <- function(input, output, session) {
     }
   )
 
-  make_pi_server(
-    "pop_index", pop_income_index, "population_index", "Population Index"
-  )
-
-  make_pi_server(
-    "inc_index", pop_income_index, "income_index", "Income Index"
-  )
+  make_pi_server("pi", pop_income_index)
 
   # ── SNAP / TANF ────────────────────────────────────────
   make_snap_tanf_server("snap", "SNAP")
