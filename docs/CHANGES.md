@@ -212,3 +212,44 @@ Merged into a single "SNAP & TANF" tab with a `radioButtons` toggle to switch be
 - `make_snap_tanf_ui(id, label)` — unchanged signature; `radioButtons(ns("program"))` added as first sidebar control
 - `main/app.R` updated from two calls to one each (id: `"snap_tanf"`)
 - New `snap_tanf_dev.R` standalone test app created
+
+---
+
+# Changelog — 2026-04-10
+
+Summary of all changes made to the Ready, Set, GROW! Shiny dashboard in this session.
+
+---
+
+## 1. Ready Mind — School District Proficiency Module
+
+**Files created:** `ready_mind/global.R`, `ready_mind/proficiency.R`, `ready_mind/proficiency_dev.R`
+**Files changed:** `main/global.R`, `main/app.R`, `data/raw_data/ready_mind/data-BhuEI.csv`
+
+### Background
+A standalone Shiny app exploring NY State school district ELA and Math proficiency rankings was integrated into the Ready Mind tab of the main dashboard.
+
+### New Files
+
+#### `ready_mind/global.R`
+Loads and prepares the proficiency dataset:
+- Parses percentage strings (`"23%"` → `23.0` numeric) and handles `N/A` values
+- Computes county-level averages (`ela_avg`, `math_avg`) for the choropleth map
+- Joins with NY county geometries via `tigris::counties()` to produce `proficiency_ny_counties` (sf object)
+- Exposes: `proficiency_df`, `proficiency_ny_counties`, `proficiency_counties`
+
+#### `ready_mind/proficiency.R`
+Clean module following project conventions (`make_proficiency_ui` / `make_proficiency_server`):
+- **Sidebar:** Subject radio (ELA / Math) + County selector (default: Ontario)
+- **KPI boxes (4):** Geneva City SD %, Geneva City SD statewide rank, Ontario County avg %, NY State avg % — all reactive to the Subject toggle
+- **Leaflet choropleth map:** county averages colored by viridis palette; Ontario County outlined in red; updates reactively via `leafletProxy` (no full rebuild on subject change)
+- **Horizontal bar chart:** districts within the selected county sorted by proficiency descending; Geneva City SD bar highlighted in red (`#E74C3C`), all others in gray (`#BBBBBB`)
+- Geneva City SD Math shows "N/A" (no Math data in source) — handled gracefully throughout
+
+#### `ready_mind/proficiency_dev.R`
+Standalone test app (NOT sourced by main app). Sources `ready_mind/global.R` and `ready_mind/proficiency.R`, wraps module in `navset_pill`, calls `shinyApp()`. Run directly in RStudio for isolated testing.
+
+### Changes to Existing Files
+
+- **`main/global.R`:** Added `source(here::here("ready_mind", "global.R"))` and `source(here::here("ready_mind", "proficiency.R"))` following the existing sourcing pattern
+- **`main/app.R`:** Ready Mind `tabPanel` now contains `navset_pill(make_proficiency_ui("prof", "School Proficiency"))` in UI; `make_proficiency_server("prof", proficiency_df, proficiency_ny_counties)` added to server
