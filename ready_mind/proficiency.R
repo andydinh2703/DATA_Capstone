@@ -1,0 +1,224 @@
+# ──────────────────────────────────────────────────────────
+# proficiency.R — School District Proficiency Module
+# Provides: make_proficiency_ui, make_proficiency_server
+# Data objects (proficiency_df, proficiency_ny_counties, proficiency_counties)
+# loaded by ready_mind/global.R
+# ──────────────────────────────────────────────────────────
+
+# ── Helper: KPI percentage for a single district ─────────
+# Returns formatted "XX.X%" or "N/A" for the given district and column.
+proficiency_kpi_pct <- function(df, district, col) {
+  val <- df %>% filter(District == district) %>% pull(col)
+  if (length(val) == 0 || all(is.na(val))) return("N/A")
+  paste0(round(val[1], 1), "%")
+}
+
+# ── Helper: Statewide ranking for a single district ──────
+# Returns formatted "#NNN / NNN" based on the rank column.
+proficiency_kpi_rank <- function(df, district, rank_col, total) {
+  val <- df %>% filter(District == district) %>% pull(rank_col)
+  if (length(val) == 0 || all(is.na(val))) return("N/A")
+  paste0("#", val[1], " / ", total)
+}
+
+# ── Helper: County average for a given subject ───────────
+# Returns formatted "XX.X%" for the county mean, or "N/A".
+proficiency_kpi_county <- function(county_avg, county, col) {
+  val <- county_avg %>% filter(County == county) %>% pull(col)
+  if (length(val) == 0 || all(is.na(val))) return("N/A")
+  paste0(round(val[1], 1), "%")
+}
+
+# ── UI module ────────────────────────────────────────────
+# make_proficiency_ui: builds the nav_panel tab for NY School District Proficiency.
+#   id    — Shiny module ID (must match make_proficiency_server call)
+#   label — text shown on the pill tab (e.g. "School Proficiency")
+make_proficiency_ui <- function(id, label) {
+  ns <- NS(id)
+  nav_panel(
+    title = label,
+    layout_sidebar(
+      sidebar = sidebar(
+        width = 280,
+        radioButtons(
+          ns("subject"), "Subject",
+          choices  = c("ELA", "Math"),
+          selected = "ELA"
+        ),
+        selectInput(
+          ns("county"), "County",
+          choices  = proficiency_counties,
+          selected = "Ontario"
+        ),
+        p("Percentage of students scoring at or above proficiency on New York State ",
+          "assessments. Geneva City SD is highlighted in red. Ontario County, where ",
+          "Geneva is located, is outlined in red on the map.")
+      ),
+
+      layout_columns(
+        col_widths = c(3, 3, 3, 3),
+        value_box(
+          title    = "Geneva City SD",
+          value    = textOutput(ns("kpi_geneva_pct")),
+          showcase = bsicons::bs_icon("mortarboard-fill"),
+          theme    = value_box_theme(bg = "#E74C3C", fg = "#fff")
+        ),
+        value_box(
+          title    = "Geneva City SD Rank",
+          value    = textOutput(ns("kpi_geneva_rank")),
+          showcase = bsicons::bs_icon("bar-chart-fill"),
+          theme    = value_box_theme(bg = "#C0392B", fg = "#fff")
+        ),
+        value_box(
+          title    = "Ontario County Avg",
+          value    = textOutput(ns("kpi_ontario_avg")),
+          showcase = bsicons::bs_icon("geo-alt-fill"),
+          theme    = value_box_theme(bg = "#2ECC71", fg = "#fff")
+        ),
+        value_box(
+          title    = "NY State Avg",
+          value    = textOutput(ns("kpi_state_avg")),
+          showcase = bsicons::bs_icon("map-fill"),
+          theme    = value_box_theme(bg = "#3498DB", fg = "#fff")
+        )
+      ),
+
+      layout_columns(
+        col_widths = c(6, 6),
+        card(
+          card_header(textOutput(ns("map_title"))),
+          leafletOutput(ns("map"), height = "450px")
+        ),
+        card(
+          card_header(textOutput(ns("bar_title"))),
+          plotlyOutput(ns("bar_chart"), height = "450px")
+        )
+      )
+    )
+  )
+}
+
+# ── Server module ────────────────────────────────────────
+# make_proficiency_server: handles reactivity for the proficiency module.
+#   id        — Shiny module ID (must match make_proficiency_ui call)
+#   data      — district-level data frame (proficiency_df from ready_mind/global.R)
+#   county_sf — sf object with county-level averages (proficiency_ny_counties)
+make_proficiency_server <- function(id, data, county_sf) {
+  moduleServer(id, function(input, output, session) {
+
+    # ── Column name reactives ────────────────────────────
+    # Maps the subject toggle to the correct column names in data / county_sf.
+    pct_col  <- reactive({ if (input$subject == "ELA") "ela_pct"  else "math_pct"  })
+    rank_col <- reactive({ if (input$subject == "ELA") "ela_rank" else "math_rank" })
+    avg_col  <- reactive({ if (input$subject == "ELA") "ela_avg"  else "math_avg"  })
+
+    total_districts <- nrow(data)
+
+    # ── KPIs ─────────────────────────────────────────────
+    output$kpi_geneva_pct  <- renderText(
+      proficiency_kpi_pct(data, "GENEVA CITY SD", pct_col())
+    )
+    output$kpi_geneva_rank <- renderText(
+      proficiency_kpi_rank(data, "GENEVA CITY SD", rank_col(), total_districts)
+    )
+    output$kpi_ontario_avg <- renderText({
+      val <- county_sf %>%
+        sf::st_drop_geometry() %>%
+        filter(County == "Ontario") %>%
+        pull(avg_col())
+      if (length(val) == 0 || all(is.na(val))) "N/A" else paste0(round(val[1], 1), "%")
+    })
+    output$kpi_state_avg <- renderText({
+      val <- mean(data[[pct_col()]], na.rm = TRUE)
+      if (is.na(val)) "N/A" else paste0(round(val, 1), "%")
+    })
+
+    # ── Chart titles ─────────────────────────────────────
+    output$map_title <- renderText(paste(input$subject, "Proficiency by County"))
+    output$bar_title <- renderText(
+      paste0(input$subject, " Proficiency — ", input$county, " County")
+    )
+
+    # ── Leaflet base map (tiles + viewport only) ─────────
+    output$map <- renderLeaflet({
+      leaflet() %>%
+        addProviderTiles("CartoDB.Positron") %>%
+        setView(lng = -76.1, lat = 43.0, zoom = 6)
+    })
+
+    # ── Update map polygons reactively ───────────────────
+    observe({
+      col    <- avg_col()
+      sf_df  <- county_sf
+      domain <- sf_df[[col]]
+      pal    <- colorNumeric("viridis", domain = domain, na.color = "transparent")
+
+      labels <- sprintf(
+        "<strong>%s County</strong><br/>Avg %s proficiency: %s",
+        sf_df$County,
+        input$subject,
+        ifelse(is.na(sf_df[[col]]), "N/A", paste0(round(sf_df[[col]], 1), "%"))
+      ) %>% lapply(htmltools::HTML)
+
+      leafletProxy(session$ns("map"), data = sf_df) %>%
+        clearShapes() %>%
+        clearControls() %>%
+        addPolygons(
+          fillColor    = ~pal(domain),
+          color        = "white",
+          weight       = 1,
+          fillOpacity  = 0.8,
+          label        = labels,
+          labelOptions = labelOptions(direction = "auto")
+        ) %>%
+        addPolygons(
+          data   = sf_df %>% filter(County == "Ontario"),
+          fill   = FALSE,
+          color  = "#E74C3C",
+          weight = 3
+        ) %>%
+        addLegend(
+          pal      = pal,
+          values   = domain,
+          title    = paste(input$subject, "Avg %"),
+          position = "bottomright",
+          na.label = "No data"
+        )
+    })
+
+    # ── Filtered district data for bar chart ─────────────
+    filtered_districts <- reactive({
+      data %>%
+        filter(County == input$county, !is.na(.data[[pct_col()]])) %>%
+        arrange(desc(.data[[pct_col()]])) %>%
+        mutate(
+          bar_color = ifelse(District == "GENEVA CITY SD", "#E74C3C", "#BBBBBB"),
+          pct_val   = .data[[pct_col()]],
+          District  = factor(District, levels = rev(District))
+        )
+    })
+
+    # ── Horizontal bar chart ─────────────────────────────
+    output$bar_chart <- renderPlotly({
+      df <- filtered_districts()
+      validate(need(nrow(df) > 0, "No data available for the selected county and subject."))
+
+      plot_ly(
+        df,
+        x           = ~pct_val,
+        y           = ~District,
+        type        = "bar",
+        orientation = "h",
+        marker      = list(color = ~bar_color),
+        text        = ~paste0(District, "<br>", pct_val, "%"),
+        hoverinfo   = "text"
+      ) %>%
+        layout(
+          xaxis  = list(title = paste(input$subject, "% Proficient"), range = c(0, 100)),
+          yaxis  = list(title = ""),
+          margin = list(l = 220)
+        ) %>%
+        config(displayModeBar = FALSE)
+    })
+  })
+}

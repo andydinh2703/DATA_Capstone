@@ -77,7 +77,10 @@ ui <- bslib::page_fluid(
               ),
 
               # ── Ready Mind Tab ───────────────────────────
-              tabPanel("Ready Mind")
+              tabPanel("Ready Mind",
+                       navset_pill(
+                         make_proficiency_ui("prof", "School Proficiency")
+                       ))
   )
 )
 
@@ -163,6 +166,9 @@ server <- function(input, output, session) {
 
   # ── SNAP / TANF ────────────────────────────────────────
   make_snap_tanf_server("snap_tanf")
+
+  # ── Ready Mind Tab ─────────────────────────────────────
+  make_proficiency_server("prof", proficiency_df, proficiency_ny_counties)
 }
 
 shinyApp(ui, server)
