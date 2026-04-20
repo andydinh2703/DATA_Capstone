@@ -21,6 +21,13 @@ make_lbw_ui <- function(id, label) {
           min = lbw_county_year_min, max = lbw_county_year_max,
           value = lbw_county_year_min, sep = "", step = 1, ticks = FALSE
         ),
+        selectInput(
+          ns("n_counties"),
+          "Number of comparison counties:",
+          choices  = c("5" = 5, "10" = 10, "15" = 15, "20" = 20, "All" = "all"),
+          selected = 5
+        ),
+        actionButton(ns("resample"), "Resample Counties"),
         p("This heat map displays the percentage of babies born with a low birth weight
           (<2500g) for each county in New York State. Ontario County, which is where the
           city of Geneva is located, is outlined in red.")
@@ -55,37 +62,52 @@ make_lbw_server <- function(id, data) {
         filter(!sf::st_is_empty(geometry))
     })
 
-    all_data <- reactive({
+    # NY-wide 3-year centered rolling average — stable reference regardless of resampling
+    avg_data <- reactive({
       data |>
         filter(!sf::st_is_empty(geometry)) |>
         sf::st_drop_geometry() |>
+        group_by(Year) |>
+        summarise(avg_pct = mean(percentage, na.rm = TRUE), .groups = "drop") |>
+        arrange(Year) |>
+        mutate(avg_pct = round(zoo::rollmean(avg_pct, k = 3, fill = "extend", align = "center"), 1))
+    })
+
+    # Re-sample comparison counties when button clicked or count changes
+    filtered_line_data <- eventReactive(list(input$resample, input$n_counties), {
+      req(input$n_counties)
+      all_counties   <- unique(data$County[!sf::st_is_empty(data$geometry)])
+      other_counties <- setdiff(all_counties, "Ontario")
+      if (input$n_counties == "all") {
+        selected_counties <- other_counties
+      } else {
+        n <- as.numeric(input$n_counties)
+        selected_counties <- sample(other_counties, size = min(n, length(other_counties)))
+      }
+      data |>
+        filter(County %in% c("Ontario", selected_counties)) |>
+        filter(!sf::st_is_empty(geometry)) |>
+        sf::st_drop_geometry() |>
         mutate(highlight = ifelse(County == "Ontario", "Ontario", "Other"))
-    })
+    }, ignoreNULL = FALSE)
 
-    # Render base map once — tiles and viewport are set here and never reset
-    output$map <- renderLeaflet({
-      leaflet() |>
-        addProviderTiles("CartoDB.Positron")
-    })
-
-    # Update polygons and legend reactively without rebuilding the whole map
-    observe({
-      df  <- filtered_data()
+    # Shared helper: adds polygons, county name labels, and legend to any leaflet/proxy object
+    add_map_layers <- function(map_obj, df) {
       pal <- colorNumeric("viridis", domain = df$percentage, na.color = "transparent")
-      labels <- sprintf(
+      hover_labels <- sprintf(
         "<strong>%s</strong><br/>%0.1f%% low birth weight",
         df$County, df$percentage
       ) |> lapply(htmltools::HTML)
-
-      leafletProxy(session$ns("map"), data = df) |>
-        clearShapes() |>
-        clearControls() |>
+      centroids <- suppressWarnings(
+        sf::st_coordinates(sf::st_centroid(sf::st_geometry(df)))
+      )
+      map_obj |>
         addPolygons(
           fillColor    = ~pal(percentage),
           color        = "black",
           weight       = 1,
           fillOpacity  = 0.8,
-          label        = labels,
+          label        = hover_labels,
           labelOptions = labelOptions(direction = "auto")
         ) |>
         addPolygons(
@@ -100,15 +122,52 @@ make_lbw_server <- function(id, data) {
           title    = "Low Birth Weight (%)",
           position = "bottomright"
         )
+    }
+
+    # Render base map with initial year's data — avoids blank map on first load
+    output$map <- renderLeaflet({
+      bbox    <- sf::st_bbox(data)
+      init_df <- data |>
+        filter(Year == lbw_county_year_min) |>
+        filter(!sf::st_is_empty(geometry))
+
+      add_map_layers(
+        leaflet(init_df) |>
+          addProviderTiles("CartoDB.Positron") |>
+          fitBounds(
+            lng1 = bbox[["xmin"]], lat1 = bbox[["ymin"]],
+            lng2 = bbox[["xmax"]], lat2 = bbox[["ymax"]]
+          ),
+        init_df
+      )
+    })
+
+    # Update polygons, county labels, and legend when year changes
+    observe({
+      df <- filtered_data()
+      add_map_layers(
+        leafletProxy(session$ns("map"), data = df) |>
+          clearShapes() |>
+          clearMarkers() |>
+          clearControls(),
+        df
+      )
     })
 
     output$lines <- renderPlotly({
-      df <- all_data()
+      df  <- filtered_line_data()
+      avg <- avg_data()
       p <- ggplot() +
         geom_line(
           data = df |> filter(highlight == "Other"),
           aes(x = Year, y = percentage, group = County, text = County),
           color = "grey", linewidth = 0.5, alpha = 0.7
+        ) +
+        geom_line(
+          data = avg,
+          aes(x = Year, y = avg_pct, group = 1,
+              text = paste0("NY Average: ", avg_pct, "%")),
+          color = "steelblue", linewidth = 1, linetype = "dashed"
         ) +
         geom_line(
           data = df |> filter(highlight == "Ontario"),

@@ -1,4 +1,4 @@
-# ──────────────────────────────────────────────────────────
+ # ──────────────────────────────────────────────────────────
 # main/app.R — Ready, Set, GROW! Unified Dashboard
 # ──────────────────────────────────────────────────────────
 
@@ -79,7 +79,8 @@ ui <- bslib::page_fluid(
               # ── Ready Mind Tab ───────────────────────────
               tabPanel("Ready Mind",
                        navset_pill(
-                         make_proficiency_ui("prof", "School Proficiency")
+                         make_proficiency_ui("prof", "School Proficiency"),
+                         make_ell_ui("ell", "English Language Learners")
                        ))
   )
 )
@@ -169,6 +170,7 @@ server <- function(input, output, session) {
 
   # ── Ready Mind Tab ─────────────────────────────────────
   make_proficiency_server("prof", proficiency_df, proficiency_ny_counties)
+  make_ell_server("ell", ell)
 }
 
 shinyApp(ui, server)

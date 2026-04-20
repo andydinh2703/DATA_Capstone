@@ -22,7 +22,7 @@ proficiency_df <- proficiency_raw %>%
     ela_rank  = suppressWarnings(as.integer(ela_rank)),
     math_rank = suppressWarnings(as.integer(math_rank)),
     District  = str_trim(District),
-    County    = str_trim(County)
+    County    = str_trim(ifelse(County == "Saint Lawrence", "St. Lawrence", County))
   )
 
 # ── County-level averages ─────────────────────────────────
@@ -44,3 +44,18 @@ proficiency_ny_counties <- tigris::counties(
   sf::st_as_sf()
 
 proficiency_counties <- sort(unique(proficiency_df$County))
+
+# ── English Language Learners ─────────────────────────────
+ell_raw <- read_csv(
+  here::here("data", "raw_data", "ready_mind", "englishLL.csv"),
+  col_types = cols(.default = col_character())
+)
+
+ell <- ell_raw %>%
+  filter(!is.na(Count)) %>%
+  mutate(
+    year_start = as.integer(substr(Year, 1, 4)),
+    Count      = as.integer(gsub(",", "", Count)),
+    Enrollment = suppressWarnings(as.integer(gsub(",", "", Enrollment))),
+    Proportion = as.numeric(Proportion)
+  )

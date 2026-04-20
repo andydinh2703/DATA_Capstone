@@ -18,7 +18,7 @@ proficiency_kpi_pct <- function(df, district, col) {
 proficiency_kpi_rank <- function(df, district, rank_col, total) {
   val <- df %>% filter(District == district) %>% pull(rank_col)
   if (length(val) == 0 || all(is.na(val))) return("N/A")
-  paste0("#", val[1], " / ", total)
+  paste0(val[1], " / ", total)
 }
 
 # ── Helper: County average for a given subject ───────────
@@ -139,32 +139,20 @@ make_proficiency_server <- function(id, data, county_sf) {
       paste0(input$subject, " Proficiency — ", input$county, " County")
     )
 
-    # ── Leaflet base map (tiles + viewport only) ─────────
-    output$map <- renderLeaflet({
-      leaflet() %>%
-        addProviderTiles("CartoDB.Positron") %>%
-        setView(lng = -76.1, lat = 43.0, zoom = 6)
-    })
-
-    # ── Update map polygons reactively ───────────────────
-    observe({
-      col    <- avg_col()
-      sf_df  <- county_sf
+    # ── Shared helper: adds polygons and legend to any leaflet/proxy object ──
+    add_proficiency_layers <- function(map_obj, sf_df, col, subject) {
       domain <- sf_df[[col]]
       pal    <- colorNumeric("viridis", domain = domain, na.color = "transparent")
-
       labels <- sprintf(
         "<strong>%s County</strong><br/>Avg %s proficiency: %s",
         sf_df$County,
-        input$subject,
+        subject,
         ifelse(is.na(sf_df[[col]]), "N/A", paste0(round(sf_df[[col]], 1), "%"))
       ) %>% lapply(htmltools::HTML)
 
-      leafletProxy(session$ns("map"), data = sf_df) %>%
-        clearShapes() %>%
-        clearControls() %>%
+      map_obj %>%
         addPolygons(
-          fillColor    = ~pal(domain),
+          fillColor    = pal(domain),
           color        = "white",
           weight       = 1,
           fillOpacity  = 0.8,
@@ -180,10 +168,32 @@ make_proficiency_server <- function(id, data, county_sf) {
         addLegend(
           pal      = pal,
           values   = domain,
-          title    = paste(input$subject, "Avg %"),
+          title    = paste(subject, "Avg %"),
           position = "bottomright",
           na.label = "No data"
         )
+    }
+
+    # ── Leaflet base map with initial ELA layer ───────────
+    output$map <- renderLeaflet({
+      add_proficiency_layers(
+        leaflet(county_sf) %>%
+          addProviderTiles("CartoDB.Positron") %>%
+          setView(lng = -76.1, lat = 43.0, zoom = 6),
+        county_sf, col = "ela_avg", subject = "ELA"
+      )
+    })
+
+    # ── Update map polygons when subject changes ──────────
+    observe({
+      col   <- avg_col()
+      sf_df <- county_sf
+      add_proficiency_layers(
+        leafletProxy(session$ns("map"), data = sf_df) %>%
+          clearShapes() %>%
+          clearControls(),
+        sf_df, col = col, subject = input$subject
+      )
     })
 
     # ── Filtered district data for bar chart ─────────────

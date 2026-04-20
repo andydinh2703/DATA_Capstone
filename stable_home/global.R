@@ -44,10 +44,7 @@ insurance_raw <- read_csv(
 
 insurance_df <- insurance_raw %>%
   mutate(
-    Community = case_when(
-      Community == "City of Geneva" ~ "Geneva",
-      TRUE                          ~ Community
-    )
+    Community = recode(Community, "City of Geneva" = "Geneva")
   ) %>%
   filter(Community %in% location_levels) %>%
   mutate(

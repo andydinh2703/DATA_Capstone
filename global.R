@@ -11,6 +11,7 @@ library(leaflet)
 library(htmltools)
 library(tigris)
 library(sf)
+library(zoo)
 
 # ── Source sub-app data ──────────────────────────────────
 source(here::here("healthy_beginnings", "global.R"))
@@ -25,3 +26,4 @@ source(here::here("stable_home", "snap_tanf.R"))             # make_snap_tanf_ui
 source(here::here("healthy_beginnings", "lbw.R"))            # make_lbw_ui/server
 source(here::here("healthy_beginnings", "infant_mortality.R"))# make_im_ui/server
 source(here::here("ready_mind", "proficiency.R"))            # make_proficiency_ui/server
+source(here::here("ready_mind", "ell.R"))                    # make_ell_ui/server

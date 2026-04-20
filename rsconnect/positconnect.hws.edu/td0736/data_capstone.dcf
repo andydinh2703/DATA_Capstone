@@ -1,0 +1,13 @@
+name: data_capstone
+title: DATA_Capstone
+username: td0736
+account: td0736
+server: positconnect.hws.edu
+hostUrl: https://positconnect.hws.edu/__api__
+appId: 56
+bundleId: 275
+url: https://positconnect.hws.edu/content/8fc08d32-0c4e-4284-aa3a-dfbdd02bbd92/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: docs/CHANGES.md|docs/DOCUMENTATION.md|EDA/family_insurance_poverty_analysis.png|EDA/Infant_EDA.Rmd|LICENSE|README.md|skills-lock.json|.agents|.claude
