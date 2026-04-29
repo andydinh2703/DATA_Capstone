@@ -45,6 +45,11 @@ make_proficiency_ui <- function(id, label) {
           choices  = c("ELA", "Math"),
           selected = "ELA"
         ),
+        radioButtons(
+          ns("grade"), "Grade",
+          choices  = c("Grade 3" = "3", "Grade 4" = "4", "Grade 8" = "8"),
+          selected = "4"
+        ),
         selectInput(
           ns("county"), "County",
           choices  = proficiency_counties,
@@ -60,6 +65,7 @@ make_proficiency_ui <- function(id, label) {
         value_box(
           title    = "Geneva City SD",
           value    = textOutput(ns("kpi_geneva_pct")),
+          textOutput(ns("kpi_geneva_source")),
           showcase = bsicons::bs_icon("mortarboard-fill"),
           theme    = value_box_theme(bg = "#E74C3C", fg = "#fff")
         ),
@@ -93,6 +99,11 @@ make_proficiency_ui <- function(id, label) {
           card_header(textOutput(ns("bar_title"))),
           plotlyOutput(ns("bar_chart"), height = "450px")
         )
+      ),
+
+      card(
+        card_header(textOutput(ns("trend_title"))),
+        plotlyOutput(ns("trend_chart"), height = "350px")
       )
     )
   )
@@ -114,10 +125,30 @@ make_proficiency_server <- function(id, data, county_sf) {
 
     total_districts <- nrow(data)
 
+    # ── Most recent grade-specific value for Geneva ───────
+    geneva_grade_latest <- reactive({
+      df <- geneva_grade_df %>%
+        filter(Grade == as.integer(input$grade), Subject == input$subject) %>%
+        arrange(desc(Year))
+      if (nrow(df) == 0) return(NULL)
+      df[1, ]
+    })
+
     # ── KPIs ─────────────────────────────────────────────
-    output$kpi_geneva_pct  <- renderText(
-      proficiency_kpi_pct(data, "GENEVA CITY SD", pct_col())
-    )
+    output$kpi_geneva_pct <- renderText({
+      val <- data %>% filter(District == "GENEVA CITY SD") %>% pull(pct_col())
+      if (length(val) > 0 && !all(is.na(val))) return(paste0(round(val[1], 1), "%"))
+      latest <- geneva_grade_latest()
+      if (is.null(latest)) return("N/A")
+      paste0(round(latest$PCT, 1), "%")
+    })
+    output$kpi_geneva_source <- renderText({
+      val <- data %>% filter(District == "GENEVA CITY SD") %>% pull(pct_col())
+      if (length(val) > 0 && !all(is.na(val))) return("")
+      latest <- geneva_grade_latest()
+      if (is.null(latest)) return("")
+      paste0("Grade ", input$grade, " · ", latest$Year)
+    })
     output$kpi_geneva_rank <- renderText(
       proficiency_kpi_rank(data, "GENEVA CITY SD", rank_col(), total_districts)
     )
@@ -196,14 +227,56 @@ make_proficiency_server <- function(id, data, county_sf) {
       )
     })
 
+    # ── Geneva grade-level trend ─────────────────────────
+    geneva_trend_filtered <- reactive({
+      geneva_grade_df %>%
+        filter(Grade == as.integer(input$grade), Subject == input$subject)
+    })
+
+    output$trend_title <- renderText({
+      paste0("Geneva City SD — Grade ", input$grade, " ", input$subject, " Proficiency Over Time")
+    })
+
+    output$trend_chart <- renderPlotly({
+      df <- geneva_trend_filtered()
+      validate(need(nrow(df) > 0, "No data available for the selected grade and subject."))
+
+      plot_ly(
+        df,
+        x         = ~Year,
+        y         = ~PCT,
+        type      = "scatter",
+        mode      = "lines+markers",
+        line      = list(color = "#E74C3C", width = 2),
+        marker    = list(color = "#E74C3C", size = 7),
+        text      = ~paste0(input$subject, " (Grade ", input$grade, ")<br>Year: ", Year, "<br>", PCT, "% proficient"),
+        hoverinfo = "text"
+      ) %>%
+        layout(
+          xaxis  = list(title = "Year", tickformat = "d"),
+          yaxis  = list(title = paste(input$subject, "% Proficient"), range = c(0, 100))
+        ) %>%
+        config(displayModeBar = FALSE)
+    })
+
     # ── Filtered district data for bar chart ─────────────
     filtered_districts <- reactive({
-      data %>%
-        filter(County == input$county, !is.na(.data[[pct_col()]])) %>%
-        arrange(desc(.data[[pct_col()]])) %>%
+      pct <- pct_col()
+      df  <- data %>% filter(County == input$county)
+
+      # If Geneva's statewide value is NA, substitute grade-specific most recent
+      geneva_idx <- which(df$District == "GENEVA CITY SD")
+      if (length(geneva_idx) > 0 && is.na(df[[pct]][geneva_idx])) {
+        latest <- geneva_grade_latest()
+        if (!is.null(latest)) df[[pct]][geneva_idx] <- latest$PCT
+      }
+
+      df %>%
+        filter(!is.na(.data[[pct]])) %>%
+        arrange(desc(.data[[pct]])) %>%
         mutate(
           bar_color = ifelse(District == "GENEVA CITY SD", "#E74C3C", "#BBBBBB"),
-          pct_val   = .data[[pct_col()]],
+          pct_val   = .data[[pct]],
           District  = factor(District, levels = rev(District))
         )
     })

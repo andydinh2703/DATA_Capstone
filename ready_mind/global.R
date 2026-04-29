@@ -41,9 +41,35 @@ proficiency_ny_counties <- tigris::counties(
 ) %>%
   rename(County = "NAME") %>%
   left_join(proficiency_county_avg, by = "County") %>%
-  sf::st_as_sf()
+  sf::st_as_sf() %>%
+  sf::st_transform(4326)
 
 proficiency_counties <- sort(unique(proficiency_df$County))
+
+# ── Geneva Grade-Level Proficiency ───────────────────────
+geneva_grade_raw <- read_csv(
+  here::here("data", "raw_data", "ready_mind", "NYS_proficiency_3_4_8.csv"),
+  col_types = cols(.default = col_character())
+)
+
+geneva_grade_df <- geneva_grade_raw %>%
+  mutate(
+    Year  = as.integer(Year),
+    Grade = as.integer(Grade),
+    PCT   = as.numeric(PCT)
+  ) %>%
+  # For grade 8 math from 2015+: Combined covers both NYSTP and Regents students;
+  # drop the component rows so we don't double-count.
+  filter(!(Grade == 8 & Subject %in% c("MATH NYSTP", "MATH Regents") & Year >= 2015)) %>%
+  mutate(
+    Subject = case_when(
+      Subject %in% c("MATH", "MATH NYSTP", "MATH Combined") ~ "Math",
+      Subject == "ELA" ~ "ELA",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  filter(!is.na(Subject), !is.na(PCT)) %>%
+  select(Year, Grade, Subject, PCT)
 
 # ── English Language Learners ─────────────────────────────
 ell_raw <- read_csv(

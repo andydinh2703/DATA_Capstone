@@ -8,19 +8,26 @@ source("global.R")
 # UI
 # ════════════════════════════════════════════════════════
 ui <- bslib::page_fluid(
-  titlePanel("Ready, Set, GROW!"),
+  div(
+    style = "display: flex; justify-content: space-between; align-items: center;
+             padding: 8px 16px; margin-bottom: 4px;",
+    h2("Ready, Set, GROW!", style = "margin: 0;"),
+    img(src = "success_logo.png", height = "65px",
+        alt = "Success for Geneva's Children")
+  ),
   tabsetPanel(
     id = "tabset",
 
               # ── Overview Tab ─────────────────────────────
               tabPanel("Overview",
-                       titlePanel("Information about the project"),
-                       actionButton("g_children_success", "Success for Geneva's Children"),
-                       actionButton("goals", "Goals"),
-                       actionButton("data_source", "Where the data came from"),
-                       br(),
-                       br(),
-                       uiOutput("overview_text")
+                       navset_pill(
+                         nav_panel("Success for Geneva's Children",
+                                   includeMarkdown("docs/background_info.md")),
+                         nav_panel("Goals",
+                                   includeMarkdown("docs/goals.md")),
+                         nav_panel("Data Source",
+                                   includeMarkdown("docs/data_source.md"))
+                       )
               ),
 
               # ── Healthy Born Tab ─────────────────────────
@@ -49,21 +56,9 @@ ui <- bslib::page_fluid(
                            rate_label         = "Insurance Coverage",
                            bottom_chart_label = "Change Over Selected Period"
                          ),
-                         make_sh_tab_ui(
-                           id                 = "family",
-                           label              = "Family Structure",
-                           year_min           = family_year_min,
-                           year_max           = family_year_max,
-                           rate_label         = "% of Households",
-                           bottom_chart_label = "Trends by Household Type",
-                           extra_controls = function(ns) {
-                             checkboxGroupInput(
-                               ns("family_types"),
-                               label    = "Household Type",
-                               choices  = c("Two parents", "Single mother", "Single father"),
-                               selected = c("Two parents", "Single mother", "Single father")
-                             )
-                           }
+                         make_family_ui(
+                           id    = "family",
+                           label = "Family Structure"
                          ),
                          make_pi_ui(
                            id    = "pi",
@@ -92,43 +87,6 @@ ui <- bslib::page_fluid(
 # ════════════════════════════════════════════════════════
 server <- function(input, output, session) {
 
-  # ── Overview Tab ───────────────────────────────────────
-  overview_section <- reactiveVal("children")
-  observeEvent(input$goals, {
-    overview_section("goals")
-  })
-  observeEvent(input$data_source, {
-    overview_section("data_source")
-  })
-  observeEvent(input$g_children_success, {
-    overview_section("children")
-  })
-  output$overview_text <- renderUI({
-    if (overview_section() == "goals") {
-      tagList(
-        h4("There are three main goals of this project:"),
-        tags$ol(
-          tags$li("Determine if Geneva's children are born healthy."),
-          tags$li("Determine if Geneva's children have a stable home."),
-          tags$li("Determine if Geneva's children have a ready mind.")
-        )
-      )
-    } else if (overview_section() == "data_source") {
-      p("text about where data came from")
-    } else if (overview_section() == "children") {
-      tagList(
-      h4("Background on Success for Geneva's Children: "),
-      p("The mission of Success for Geneva's Children is to mobilize the community to
-        improve the health and well-being of all our children and their families."),
-      h4("Success for Geneva's Children Statement of Purpose: "),
-      p("\"Through understanding the needs and interests of children and their parents,
-        we collectively bring resources to improving their quality of life.  We strive to
-        build effective interventions and supports, knowing their profound and beneficial
-        impact on the individual child, the family, and the community.\"")
-      )
-    }
-  })
-
   # ── Healthy Born Tab ───────────────────────────────────
   make_im_server(
     "im", data = im, rate_col = "Rate", rate_label = "Infant Mortality Rate"
@@ -152,16 +110,7 @@ server <- function(input, output, session) {
     rate_label = "Insurance Coverage"
   )
 
-  make_sh_tab_server(
-    id         = "family",
-    data       = family_df,
-    rate_col   = "PCT",
-    rate_label = "% of Households",
-    extra_filter = function(df, input) {
-      req(length(input$family_types) > 0)
-      df %>% filter(Type %in% input$family_types)
-    }
-  )
+  make_family_server("family", family_df)
 
   make_pi_server("pi", pop_income_index)
 

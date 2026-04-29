@@ -87,7 +87,7 @@ make_im_server <- function(id, data, rate_col, rate_label) {
 
     output$line_chart <- renderPlotly({
       req(nrow(filtered()) > 0)
-      p <- filtered() %>%
+      p <- suppressWarnings(filtered() %>%
         ggplot(aes(
           x = Year,
           y = .data[[rate_col]],
@@ -113,7 +113,7 @@ make_im_server <- function(id, data, rate_col, rate_label) {
           axis.text.x  = element_text(angle = 45, hjust = 1),
           legend.position = "top",
           panel.grid.minor = element_blank()
-        )
+        ))
 
       ggplotly(p, tooltip = "text") %>%
         layout(
@@ -125,7 +125,7 @@ make_im_server <- function(id, data, rate_col, rate_label) {
 
     output$bar_chart <- renderPlotly({
       req(nrow(filtered()) > 0)
-      p <- filtered() %>%
+      p <- suppressWarnings(filtered() %>%
         ggplot(aes(
           x = factor(Year),
           y = .data[[rate_col]],
@@ -147,7 +147,7 @@ make_im_server <- function(id, data, rate_col, rate_label) {
         theme(
           legend.position  = "top",
           panel.grid.minor = element_blank()
-        )
+        ))
 
       ggplotly(p, tooltip = "text") %>%
         layout(

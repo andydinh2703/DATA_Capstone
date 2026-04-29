@@ -94,7 +94,8 @@ ny_counties <- ny_counties |> rename(County = "NAME")
 
 birth_rate_with_counties <- lbw_county |>
   left_join(ny_counties, by = "County") |>
-  sf::st_as_sf()
+  sf::st_as_sf() |>
+  sf::st_transform(4326)
 
 lbw_county_year_min <- min(birth_rate_with_counties$Year, na.rm = TRUE)
 lbw_county_year_max <- max(birth_rate_with_counties$Year, na.rm = TRUE)

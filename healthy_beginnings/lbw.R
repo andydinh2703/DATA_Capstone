@@ -157,7 +157,7 @@ make_lbw_server <- function(id, data) {
     output$lines <- renderPlotly({
       df  <- filtered_line_data()
       avg <- avg_data()
-      p <- ggplot() +
+      p <- suppressWarnings(ggplot() +
         geom_line(
           data = df |> filter(highlight == "Other"),
           aes(x = Year, y = percentage, group = County, text = County),
@@ -175,7 +175,7 @@ make_lbw_server <- function(id, data) {
           color = "red", linewidth = 1.2, alpha = 0.9
         ) +
         labs(y = "% Low Birth Weight", x = "Year") +
-        theme_minimal()
+        theme_minimal())
       ggplotly(p, tooltip = "text")
     })
   })

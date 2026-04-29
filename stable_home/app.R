@@ -113,7 +113,7 @@ make_sh_tab_server <- function(id, data, rate_col, rate_label,
       has_type <- "Type" %in% names(filtered())
 
       if (has_type) {
-        p <- filtered() %>%
+        p <- suppressWarnings(filtered() %>%
           ggplot(aes(
             x        = Year,
             y        = .data[[rate_col]],
@@ -135,9 +135,9 @@ make_sh_tab_server <- function(id, data, rate_col, rate_label,
               "Single mother" = "dashed",
               "Single father" = "dotted"
             )
-          )
+          ))
       } else {
-        p <- filtered() %>%
+        p <- suppressWarnings(filtered() %>%
           ggplot(aes(
             x     = Year,
             y     = .data[[rate_col]],
@@ -151,7 +151,7 @@ make_sh_tab_server <- function(id, data, rate_col, rate_label,
           )) +
           geom_line(linewidth = 1.1) +
           geom_point(size = 2.5) +
-          scale_color_manual(values = location_colors)
+          scale_color_manual(values = location_colors))
       }
 
       p <- p +
@@ -188,7 +188,7 @@ make_sh_tab_server <- function(id, data, rate_col, rate_label,
 
       if ("Type" %in% names(df)) {
         # ── Small multiples: faceted line chart by household type ──
-        p <- df %>%
+        p <- suppressWarnings(df %>%
           mutate(line_color = if_else(Location == "Geneva", "Geneva", "Other")) %>%
           ggplot(aes(
             x     = Year,
@@ -214,7 +214,7 @@ make_sh_tab_server <- function(id, data, rate_col, rate_label,
             axis.text.x     = element_text(angle = 45, hjust = 1, size = 9),
             strip.text      = element_text(face = "bold", size = 11),
             panel.spacing   = unit(1, "lines")
-          )
+          ))
       } else {
         # ── Slope chart: first vs last year per location ──
         start_yr <- min(df$Year)
@@ -229,7 +229,7 @@ make_sh_tab_server <- function(id, data, rate_col, rate_label,
 
         slope_colors <- c("Geneva" = "#E74C3C", "Ontario" = "#BBBBBB", "NYS" = "#BBBBBB")
 
-        p <- ggplot(slope_df,
+        p <- suppressWarnings(ggplot(slope_df,
                     aes(
                       x     = endpoint,
                       y     = .data[[rate_col]],
@@ -252,7 +252,7 @@ make_sh_tab_server <- function(id, data, rate_col, rate_label,
             panel.grid.major.x = element_blank(),
             legend.position    = "top",
             axis.text          = element_text(size = 12, face = "bold")
-          )
+          ))
       }
 
       ggplotly(p, tooltip = "text") %>%
