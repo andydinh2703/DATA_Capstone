@@ -55,13 +55,16 @@ make_sh_tab_ui <- function(id, label, year_min, year_max,
           theme    = value_box_theme(bg = location_colors["NYS"], fg = "#fff")
         )
       ),
-      card(
-        card_header("Trend Over Time"),
-        plotlyOutput(ns("line_chart"), height = "380px")
-      ),
-      card(
-        card_header(bottom_chart_label),
-        plotlyOutput(ns("comparison_chart"), height = "320px")
+      layout_columns(
+        col_widths = c(6, 6),
+        card(
+          card_header("Trend Over Time"),
+          plotlyOutput(ns("line_chart"), height = "380px")
+        ),
+        card(
+          card_header(bottom_chart_label),
+          plotlyOutput(ns("comparison_chart"), height = "380px")
+        )
       )
     )
   )
@@ -113,6 +116,7 @@ make_sh_tab_server <- function(id, data, rate_col, rate_label,
       has_type <- "Type" %in% names(filtered())
 
       if (has_type) {
+        # Type-aware chart: keep ggplotly for facet support
         p <- suppressWarnings(filtered() %>%
           ggplot(aes(
             x        = Year,
@@ -135,50 +139,73 @@ make_sh_tab_server <- function(id, data, rate_col, rate_label,
               "Single mother" = "dashed",
               "Single father" = "dotted"
             )
-          ))
-      } else {
-        p <- suppressWarnings(filtered() %>%
-          ggplot(aes(
-            x     = Year,
-            y     = .data[[rate_col]],
-            color = Location,
-            group = Location,
-            text  = paste0(
-              "<b>", Location, "</b><br>",
-              "Year: ", Year, "<br>",
-              rate_label, ": ", .data[[rate_col]], "%"
-            )
+          ) +
+          scale_x_continuous(breaks = seq(
+            min(filtered()$Year), max(filtered()$Year), 1
           )) +
-          geom_line(linewidth = 1.1) +
-          geom_point(size = 2.5) +
-          scale_color_manual(values = location_colors))
+          labs(x = "Year", y = paste0(rate_label, " (%)"),
+               color = NULL, linetype = NULL) +
+          theme_minimal(base_size = 13) +
+          theme(
+            axis.text.x      = element_text(angle = 45, hjust = 1),
+            legend.position  = "top",
+            panel.grid.minor = element_blank()
+          ))
+
+        ggplotly(p, tooltip = "text") %>%
+          layout(
+            legend    = list(orientation = "h", x = 0.5, xanchor = "center", y = 1.12),
+            hovermode = "closest"
+          ) %>%
+          style(connectgaps = FALSE) %>%
+          config(displayModeBar = FALSE)
+
+      } else {
+        # Direct plot_ly for simple location comparison (Poverty / Insurance)
+        df <- filtered() %>%
+          select(Year, Location, .data[[rate_col]]) %>%
+          tidyr::pivot_wider(names_from = Location, values_from = .data[[rate_col]]) %>%
+          arrange(Year)
+
+        plot_ly(df, x = ~Year) %>%
+          add_trace(
+            y      = ~Geneva,
+            name   = "Geneva",
+            type   = "scatter",
+            mode   = "lines+markers",
+            line   = list(color = location_colors[["Geneva"]], width = 2.5),
+            marker = list(color = location_colors[["Geneva"]], size = 7),
+            hovertemplate = paste0("Geneva: %{y:.1f}%<extra></extra>")
+          ) %>%
+          add_trace(
+            y      = ~Ontario,
+            name   = "Ontario County",
+            type   = "scatter",
+            mode   = "lines+markers",
+            line   = list(color = location_colors[["Ontario"]], width = 2, dash = "dash"),
+            marker = list(color = location_colors[["Ontario"]], size = 5),
+            hovertemplate = paste0("Ontario County: %{y:.1f}%<extra></extra>")
+          ) %>%
+          add_trace(
+            y      = ~NYS,
+            name   = "New York State",
+            type   = "scatter",
+            mode   = "lines+markers",
+            line   = list(color = location_colors[["NYS"]], width = 2, dash = "dot"),
+            marker = list(color = location_colors[["NYS"]], size = 5),
+            hovertemplate = paste0("NYS: %{y:.1f}%<extra></extra>")
+          ) %>%
+          layout(
+            xaxis     = list(title = "Year", tickmode = "linear", dtick = 1,
+                             tickangle = -45),
+            yaxis     = list(title = paste0(rate_label, " (%)"),
+                             ticksuffix = "%", rangemode = if (id == "insurance") "normal" else "tozero"),
+            legend    = list(orientation = "h", x = 0.5, xanchor = "center", y = 1.12),
+            hovermode = "x unified",
+            margin    = list(l = 50, r = 20, t = 20, b = 60)
+          ) %>%
+          config(displayModeBar = FALSE)
       }
-
-      p <- p +
-        scale_x_continuous(breaks = seq(
-          min(filtered()$Year), max(filtered()$Year), 1
-        )) +
-        labs(
-          x        = "Year",
-          y        = paste0(rate_label, " (%)"),
-          color    = NULL,
-          linetype = NULL
-        ) +
-        theme_minimal(base_size = 13) +
-        theme(
-          axis.text.x      = element_text(angle = 45, hjust = 1),
-          legend.position  = "top",
-          panel.grid.minor = element_blank()
-        )
-
-      ggplotly(p, tooltip = "text") %>%
-        layout(
-          legend    = list(orientation = "h", x = 0.5, xanchor = "center", y = 1.12),
-          hovermode = "closest"
-        ) %>%
-        # connectgaps = FALSE: data gaps (e.g. 2011 missing) show as breaks
-        style(connectgaps = FALSE) %>%
-        config(displayModeBar = FALSE)
     })
 
     # ── Comparison chart (slope or small multiples) ──────
@@ -205,7 +232,7 @@ make_sh_tab_server <- function(id, data, rate_col, rate_label,
           geom_line(linewidth = 1) +
           geom_point(size = 2) +
           facet_wrap(~ Type, ncol = 3) +
-          scale_color_manual(values = c("Geneva" = "#E74C3C", "Other" = "#BBBBBB")) +
+          scale_color_manual(values = c("Geneva" = "#D94F4F", "Other" = "#BBBBBB")) +
           scale_x_continuous(breaks = \(x) pretty(x, n = 4)) +
           labs(x = "Year", y = paste0(rate_label, " (%)"), color = NULL) +
           theme_minimal(base_size = 13) +
@@ -215,49 +242,55 @@ make_sh_tab_server <- function(id, data, rate_col, rate_label,
             strip.text      = element_text(face = "bold", size = 11),
             panel.spacing   = unit(1, "lines")
           ))
+
+        ggplotly(p, tooltip = "text") %>%
+          layout(hovermode = "closest") %>%
+          config(displayModeBar = FALSE)
+
       } else {
-        # ── Slope chart: first vs last year per location ──
+        # ── Slope chart: first vs last year per location (direct plot_ly) ──
         start_yr <- min(df$Year)
         end_yr   <- max(df$Year)
         req(start_yr < end_yr)
 
         slope_df <- df %>%
-          group_by(Location) %>%
           filter(Year == start_yr | Year == end_yr) %>%
-          mutate(endpoint = factor(Year, levels = c(start_yr, end_yr))) %>%
-          ungroup()
+          select(Year, Location, .data[[rate_col]]) %>%
+          tidyr::pivot_wider(names_from = Location, values_from = .data[[rate_col]]) %>%
+          arrange(Year) %>%
+          mutate(endpoint = factor(Year))
 
-        slope_colors <- c("Geneva" = "#E74C3C", "Ontario" = "#BBBBBB", "NYS" = "#BBBBBB")
+        make_slope_trace <- function(p, col, name, color, width, dash, size) {
+          vals <- slope_df[[col]]
+          p %>% add_trace(
+            x      = ~endpoint,
+            y      = vals,
+            name   = name,
+            type   = "scatter",
+            mode   = "lines+markers+text",
+            line   = list(color = color, width = width, dash = dash),
+            marker = list(color = color, size = size),
+            text   = paste0(vals, "%"),
+            textposition = "top center",
+            textfont     = list(size = 11),
+            hovertemplate = paste0(name, ": %{y:.1f}%<extra></extra>")
+          )
+        }
 
-        p <- suppressWarnings(ggplot(slope_df,
-                    aes(
-                      x     = endpoint,
-                      y     = .data[[rate_col]],
-                      group = Location,
-                      color = Location,
-                      text  = paste0(
-                        "<b>", Location, "</b><br>",
-                        "Year: ", Year, "<br>",
-                        rate_label, ": ", .data[[rate_col]], "%"
-                      )
-                    )) +
-          geom_line(linewidth = 1) +
-          geom_point(size = 3.5) +
-          geom_text(aes(label = paste0(.data[[rate_col]], "%")),
-                    vjust = -1, size = 3.5, show.legend = FALSE) +
-          scale_color_manual(values = slope_colors) +
-          labs(x = NULL, y = paste0(rate_label, " (%)"), color = NULL) +
-          theme_minimal(base_size = 13) +
-          theme(
-            panel.grid.major.x = element_blank(),
-            legend.position    = "top",
-            axis.text          = element_text(size = 12, face = "bold")
-          ))
+        plot_ly(slope_df, x = ~endpoint) %>%
+          make_slope_trace("Geneva",  "Geneva",         location_colors[["Geneva"]],  2.5, "solid", 8) %>%
+          make_slope_trace("Ontario", "Ontario County",  "#BBBBBB",                    2,   "dash",  6) %>%
+          make_slope_trace("NYS",     "New York State",  "#BBBBBB",                    2,   "dot",   6) %>%
+          layout(
+            xaxis     = list(title = ""),
+            yaxis     = list(title = paste0(rate_label, " (%)"),
+                             ticksuffix = "%"),
+            legend    = list(orientation = "h", x = 0.5, xanchor = "center", y = 1.12),
+            hovermode = "x unified",
+            margin    = list(l = 50, r = 20, t = 30, b = 30)
+          ) %>%
+          config(displayModeBar = FALSE)
       }
-
-      ggplotly(p, tooltip = "text") %>%
-        layout(hovermode = "closest") %>%
-        config(displayModeBar = FALSE)
     })
   })
 }

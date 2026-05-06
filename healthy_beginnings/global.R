@@ -10,9 +10,9 @@ library(plotly)
 
 # ── Color palette ───────────────────────────────────────
 location_colors <- c(
-  "Geneva"  = "#E74C3C",
-  "Ontario" = "#2ECC71",
-  "NYS"     = "#3498DB"
+  "Geneva"  = "#D94F4F",
+  "Ontario" = "#4CAF7D",
+  "NYS"     = "#3D7FBA"
 )
 
 location_levels <- c("Geneva", "Ontario", "NYS")

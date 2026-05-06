@@ -157,26 +157,67 @@ make_lbw_server <- function(id, data) {
     output$lines <- renderPlotly({
       df  <- filtered_line_data()
       avg <- avg_data()
-      p <- suppressWarnings(ggplot() +
-        geom_line(
-          data = df |> filter(highlight == "Other"),
-          aes(x = Year, y = percentage, group = County, text = County),
-          color = "grey", linewidth = 0.5, alpha = 0.7
-        ) +
-        geom_line(
-          data = avg,
-          aes(x = Year, y = avg_pct, group = 1,
-              text = paste0("NY Average: ", avg_pct, "%")),
-          color = "steelblue", linewidth = 1, linetype = "dashed"
-        ) +
-        geom_line(
-          data = df |> filter(highlight == "Ontario"),
-          aes(x = Year, y = percentage, group = County, text = County),
-          color = "red", linewidth = 1.2, alpha = 0.9
-        ) +
-        labs(y = "% Low Birth Weight", x = "Year") +
-        theme_minimal())
-      ggplotly(p, tooltip = "text")
+
+      other_df   <- df |> filter(highlight == "Other")
+      ontario_df <- df |> filter(highlight == "Ontario")
+
+      p <- plot_ly()
+
+      # Add "Other" county traces (gray, thin)
+      for (cty in unique(other_df$County)) {
+        cty_data <- other_df |> filter(County == cty)
+        p <- p |> add_trace(
+          data   = cty_data,
+          x      = ~Year,
+          y      = ~percentage,
+          name   = cty,
+          type   = "scatter",
+          mode   = "lines",
+          line   = list(color = "rgba(180,180,180,0.6)", width = 1),
+          hovertemplate = paste0(cty, ": %{y:.1f}%<extra></extra>"),
+          showlegend = FALSE
+        )
+      }
+
+      # Add NY Average (dashed blue)
+      p <- p |> add_trace(
+        data   = avg,
+        x      = ~Year,
+        y      = ~avg_pct,
+        name   = "NY Average",
+        type   = "scatter",
+        mode   = "lines+markers",
+        line   = list(color = "#3D7FBA", width = 2, dash = "dash"),
+        marker = list(color = "#3D7FBA", size = 4),
+        hovertemplate = paste0("NY Average: %{y:.1f}%<extra></extra>")
+      )
+
+      # Add Ontario County (bold red, solid)
+      if (nrow(ontario_df) > 0) {
+        p <- p |> add_trace(
+          data   = ontario_df,
+          x      = ~Year,
+          y      = ~percentage,
+          name   = "Ontario County",
+          type   = "scatter",
+          mode   = "lines+markers",
+          line   = list(color = "#D94F4F", width = 2.5),
+          marker = list(color = "#D94F4F", size = 7),
+          hovertemplate = paste0("Ontario County: %{y:.1f}%<extra></extra>")
+        )
+      }
+
+      p |>
+        layout(
+          xaxis     = list(title = "Year", tickmode = "linear", dtick = 1,
+                           tickangle = -45),
+          yaxis     = list(title = "% Low Birth Weight",
+                           ticksuffix = "%", rangemode = "tozero"),
+          legend    = list(orientation = "h", x = 0.5, xanchor = "center", y = 1.12),
+          hovermode = "x unified",
+          margin    = list(l = 50, r = 20, t = 20, b = 60)
+        ) |>
+        config(displayModeBar = FALSE)
     })
   })
 }

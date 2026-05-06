@@ -92,26 +92,54 @@ make_pi_server <- function(id, data) {
       validate(
         need(diff(input$year_range) > 5, " ")
       )
-      p <- ggplot(
-        filtered_data(),
-        aes(
-          x     = Year,
-          y     = .data[[y_var()]],
-          color = Location
-        )
-      ) +
-        geom_point(aes(
-          text = paste0(
-            "Year: ", Year,
-            "<br>", y_label(), ": ", round(.data[[y_var()]], 2),
-            "<br>Location: ", Location
-          )
-        )) +
-        geom_smooth(se = FALSE, linewidth = 0.5) +
-        labs(x = "Year", y = y_label()) +
-        theme_minimal()
 
-      ggplotly(p, tooltip = "text")
+      df <- filtered_data() |>
+        select(Year, Location, all_of(y_var())) |>
+        tidyr::pivot_wider(names_from = Location, values_from = all_of(y_var())) |>
+        arrange(Year)
+
+      # Rename "City of Geneva" if present (fallback safety)
+      if ("City of Geneva" %in% names(df)) {
+        df <- df |> rename(Geneva = `City of Geneva`)
+      }
+
+      plot_ly(df, x = ~Year) |>
+        add_trace(
+          y      = ~Geneva,
+          name   = "Geneva",
+          type   = "scatter",
+          mode   = "lines+markers",
+          line   = list(color = location_colors[["Geneva"]], width = 2.5),
+          marker = list(color = location_colors[["Geneva"]], size = 7),
+          hovertemplate = paste0("Geneva: %{y:.1f}<extra></extra>")
+        ) |>
+        add_trace(
+          y      = ~Ontario,
+          name   = "Ontario County",
+          type   = "scatter",
+          mode   = "lines+markers",
+          line   = list(color = location_colors[["Ontario"]], width = 2, dash = "dash"),
+          marker = list(color = location_colors[["Ontario"]], size = 5),
+          hovertemplate = paste0("Ontario County: %{y:.1f}<extra></extra>")
+        ) |>
+        add_trace(
+          y      = ~NYS,
+          name   = "New York State",
+          type   = "scatter",
+          mode   = "lines+markers",
+          line   = list(color = location_colors[["NYS"]], width = 2, dash = "dot"),
+          marker = list(color = location_colors[["NYS"]], size = 5),
+          hovertemplate = paste0("NYS: %{y:.1f}<extra></extra>")
+        ) |>
+        layout(
+          xaxis     = list(title = "Year", tickmode = "linear", dtick = 1,
+                           tickangle = -45),
+          yaxis     = list(title = y_label(), rangemode = "normal"),
+          legend    = list(orientation = "h", x = 0.5, xanchor = "center", y = 1.12),
+          hovermode = "x unified",
+          margin    = list(l = 50, r = 20, t = 20, b = 60)
+        ) |>
+        config(displayModeBar = FALSE)
     })
   })
 }

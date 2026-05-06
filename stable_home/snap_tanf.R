@@ -5,44 +5,12 @@
 # community_colors) loaded by stable_home/global.R
 # ──────────────────────────────────────────────────────────
 
-# ── Helper: line chart ───────────────────────────────────
-snap_line_plot <- function(df, metric, colors) {
-  ggplot(df, aes(x = Year, y = .data[[metric]],
-                 color = Community, group = Community)) +
-    geom_line(linewidth = 1) +
-    geom_point(size = 1.5) +
-    scale_color_manual(values = colors) +
-    scale_x_continuous(breaks = pretty(df$Year, n = 8)) +
-    theme_minimal(base_size = 16) +
-    theme(legend.position = "none",
-          axis.text.x = element_text(size = 10, angle = 35, hjust = 1))
-}
-
-# ── Helper: slope chart (% change from first year) ───────
-snap_slope_plot <- function(df, colors) {
-  df <- df %>%
-    group_by(Community) %>%
-    mutate(
-      baseline   = val[Year == min(Year)],
-      pct_change = round((val - baseline) / baseline * 100, 1)
-    ) %>%
-    ungroup()
-
-  ggplot(df, aes(x = Year, y = pct_change,
-                 color = Community, group = Community,
-                 text = paste0(Community,
-                               "<br>Year: ", Year,
-                               "<br>Change: ", pct_change, "%"))) +
-    geom_hline(yintercept = 0, linetype = "dashed", color = "gray60") +
-    geom_line(linewidth = 1) +
-    geom_point(size = 2.5) +
-    scale_color_manual(values = colors) +
-    scale_x_continuous(breaks = pretty(df$Year, n = 8)) +
-    labs(y = "% Change from First Year", x = "Year") +
-    theme_minimal(base_size = 16) +
-    theme(legend.position = "none",
-          axis.text.x = element_text(size = 10, angle = 35, hjust = 1))
-}
+# ── Helper: line styles per community ─────────────────────
+snap_line_styles <- list(
+  "Geneva"            = list(dash = "solid", width = 2.5, size = 7),
+  "Ontario"           = list(dash = "dash",  width = 2,   size = 5),
+  "Ontario wo Geneva" = list(dash = "dot",   width = 2,   size = 5)
+)
 
 # ── Helper: KPI (average within filtered range) ──────────
 snap_kpi <- function(df, community, metric) {
@@ -93,7 +61,7 @@ make_snap_tanf_ui <- function(id, label) {
       ),
 
       layout_columns(
-        col_widths = c(3, 3, 3, 3),
+        col_widths = c(4, 4, 4),
         value_box(
           title    = "Geneva",
           value    = textOutput(ns("kpi_geneva")),
@@ -105,12 +73,6 @@ make_snap_tanf_ui <- function(id, label) {
           value    = textOutput(ns("kpi_ontario")),
           showcase = bsicons::bs_icon("geo-alt-fill"),
           theme    = value_box_theme(bg = community_colors["Ontario"], fg = "#fff")
-        ),
-        value_box(
-          title    = "Geneva Town",
-          value    = textOutput(ns("kpi_geneva_town")),
-          showcase = bsicons::bs_icon("geo-alt-fill"),
-          theme    = value_box_theme(bg = community_colors["Geneva Town"], fg = "#fff")
         ),
         value_box(
           title    = "Ontario w/o Geneva",
@@ -161,26 +123,116 @@ make_snap_tanf_server <- function(id) {
     # ── KPIs ─────────────────────────────────────────────
     output$kpi_geneva      <- renderText(snap_kpi(filtered(), "Geneva",            active_col()))
     output$kpi_ontario     <- renderText(snap_kpi(filtered(), "Ontario",           active_col()))
-    output$kpi_geneva_town <- renderText(snap_kpi(filtered(), "Geneva Town",       active_col()))
     output$kpi_ontario_wo  <- renderText(snap_kpi(filtered(), "Ontario wo Geneva", active_col()))
 
     # ── Chart titles ─────────────────────────────────────
     output$line_title  <- renderText(paste(input$program, "Trend Over Time"))
     output$slope_title <- renderText(paste(input$program, "% Change from First Year"))
 
-    # ── Line chart ───────────────────────────────────────
+    # ── Line chart (direct plot_ly) ──────────────────────
     output$line_chart <- renderPlotly({
-      p <- snap_line_plot(filtered(), active_col(), community_colors)
-      ggplotly(p) %>% config(displayModeBar = FALSE)
+      df <- filtered()
+      req(nrow(df) > 0)
+
+      col <- active_col()
+      communities <- unique(df$Community)
+
+      # Pivot wide
+      wide <- df %>%
+        select(Year, Community, all_of(col)) %>%
+        tidyr::pivot_wider(names_from = Community, values_from = all_of(col)) %>%
+        arrange(Year)
+
+      p <- plot_ly(wide, x = ~Year)
+      for (comm in communities) {
+        if (comm %in% names(wide)) {
+          style <- snap_line_styles[[comm]] %||% list(dash = "solid", width = 1.5, size = 5)
+          clr   <- community_colors[comm] %||% "#999999"
+          p <- p %>% add_trace(
+            y      = wide[[comm]],
+            name   = comm,
+            type   = "scatter",
+            mode   = "lines+markers",
+            line   = list(color = clr, width = style$width, dash = style$dash),
+            marker = list(color = clr, size = style$size),
+            hovertemplate = paste0(comm, ": %{y:.1f}<extra></extra>")
+          )
+        }
+      }
+
+      p %>%
+        layout(
+          xaxis     = list(title = "Year", tickmode = "linear", dtick = 1,
+                           tickangle = -45),
+          yaxis     = list(title = col, rangemode = "tozero"),
+          legend    = list(orientation = "h", x = 0.5, xanchor = "center", y = 1.12),
+          hovermode = "x unified",
+          margin    = list(l = 60, r = 20, t = 20, b = 60)
+        ) %>%
+        config(displayModeBar = FALSE)
     })
 
-    # ── Slope chart ──────────────────────────────────────
+    # ── Slope chart (% change from first year, direct plot_ly) ──
     output$slope_chart <- renderPlotly({
       df <- filtered() %>%
         group_by(Community, Year) %>%
         summarise(val = mean(.data[[active_col()]], na.rm = TRUE), .groups = "drop")
-      p <- snap_slope_plot(df, community_colors)
-      ggplotly(p, tooltip = "text") %>% config(displayModeBar = FALSE)
+      req(nrow(df) > 0)
+
+      # Compute % change from first year per community
+      df <- df %>%
+        group_by(Community) %>%
+        mutate(
+          baseline   = val[Year == min(Year)],
+          pct_change = round((val - baseline) / baseline * 100, 1)
+        ) %>%
+        ungroup()
+
+      communities <- unique(df$Community)
+
+      # Pivot wide for pct_change
+      wide <- df %>%
+        select(Year, Community, pct_change) %>%
+        tidyr::pivot_wider(names_from = Community, values_from = pct_change) %>%
+        arrange(Year)
+
+      p <- plot_ly(wide, x = ~Year)
+      for (comm in communities) {
+        if (comm %in% names(wide)) {
+          style <- snap_line_styles[[comm]] %||% list(dash = "solid", width = 1.5, size = 5)
+          clr   <- community_colors[comm] %||% "#999999"
+          p <- p %>% add_trace(
+            y      = wide[[comm]],
+            name   = comm,
+            type   = "scatter",
+            mode   = "lines+markers",
+            line   = list(color = clr, width = style$width, dash = style$dash),
+            marker = list(color = clr, size = style$size),
+            hovertemplate = paste0(comm, ": %{y:.1f}%<extra></extra>")
+          )
+        }
+      }
+
+      p %>%
+        add_trace(
+          y      = rep(0, nrow(wide)),
+          x      = wide$Year,
+          type   = "scatter",
+          mode   = "lines",
+          line   = list(color = "gray60", width = 1, dash = "dash"),
+          showlegend = FALSE,
+          hoverinfo  = "skip"
+        ) %>%
+        layout(
+          xaxis     = list(title = "Year", tickmode = "linear", dtick = 1,
+                           tickangle = -45),
+          yaxis     = list(title = "% Change from First Year",
+                           ticksuffix = "%"),
+          legend    = list(orientation = "h", x = 0.5, xanchor = "center", y = 1.12),
+          hovermode = "x unified",
+          margin    = list(l = 60, r = 20, t = 20, b = 60)
+        ) %>%
+        config(displayModeBar = FALSE)
     })
   })
 }

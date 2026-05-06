@@ -7,12 +7,61 @@ source("global.R")
 # ════════════════════════════════════════════════════════
 # UI
 # ════════════════════════════════════════════════════════
+# ── Theme ───────────────────────────────────────────────
+rsg_theme <- bs_theme(
+  version   = 5,
+  bg        = "#FAFAFA",
+  fg        = "#2C3E50",
+  primary   = "#D94F4F",
+  secondary = "#4CAF7D",
+  info      = "#3D7FBA",
+  font_scale = 0.95,
+  "card-border-color" = "#E0E0E0"
+)
+
 ui <- bslib::page_fluid(
+  theme = rsg_theme,
+  tags$head(tags$style(HTML("
+    /* ── Tab styling ─────────────────────────────────── */
+    .nav-tabs .nav-link, .nav-pills .nav-link {
+      color: #5D6D7E;
+    }
+    .nav-tabs .nav-link:hover, .nav-pills .nav-link:hover {
+      color: #2C3E50;
+    }
+    .nav-tabs .nav-link.active {
+      font-weight: 600;
+      color: #2C3E50;
+      border-top: 3px solid #3D7FBA;
+      border-bottom: none;
+    }
+    .nav-tabs .nav-link {
+      border-top: 3px solid transparent;
+    }
+    .nav-pills .nav-link.active {
+      background-color: #3D7FBA;
+      color: #fff;
+    }
+    /* ── Card polish ─────────────────────────────────── */
+    .card { border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .card-header { font-weight: 600; background-color: #F5F5F5; }
+    /* ── Sidebar ─────────────────────────────────────── */
+    .sidebar { background-color: #F8F8F8; }
+    /* ── Value boxes ─────────────────────────────────── */
+    .value-box { border-radius: 8px; }
+  "))),
   div(
+    class = "dashboard-header",
     style = "display: flex; justify-content: space-between; align-items: center;
-             padding: 8px 16px; margin-bottom: 4px;",
-    h2("Ready, Set, GROW!", style = "margin: 0;"),
-    img(src = "success_logo.png", height = "65px",
+             padding: 16px 24px; margin-bottom: 8px;
+             background: #FFFFFF;
+             border-bottom: 3px solid #D94F4F; border-radius: 8px;",
+    div(
+      h2("Ready, Set, GROW!", style = "margin: 0; font-weight: 700; color: #2C3E50;"),
+      p("A Community Dashboard for Geneva's Children",
+        style = "margin: 4px 0 0 0; font-size: 0.95em; color: #5D6D7E; font-style: italic;")
+    ),
+    img(src = "success_logo.png", height = "70px",
         alt = "Success for Geneva's Children")
   ),
   tabsetPanel(
@@ -26,7 +75,9 @@ ui <- bslib::page_fluid(
                          nav_panel("Goals",
                                    includeMarkdown("docs/goals.md")),
                          nav_panel("Data Source",
-                                   includeMarkdown("docs/data_source.md"))
+                                   includeMarkdown("docs/data_source.md")),
+                         nav_panel("Dashboard Guide",
+                                   includeMarkdown("docs/dashboard_guide.md"))
                        )
               ),
 

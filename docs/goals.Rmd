@@ -1,0 +1,11 @@
+---
+output: html_document
+---
+
+##### The overarching goal of this project is to allow the broader Geneva Community to explore various relationships to determine:
+
+1. Are the children of Geneva born healthy?
+2. Do Geneva's children have a stable home life?
+3. How do Geneva's test scores compare to other school districts in Ontario County?
+
+##### We want to determine if Geneva's children are adequately prepared to be successful later on in life.

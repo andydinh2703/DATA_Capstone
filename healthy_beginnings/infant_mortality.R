@@ -34,28 +34,24 @@ make_im_ui <- function(id, label) {
           title    = "Geneva",
           value    = textOutput(ns("kpi_geneva")),
           showcase = bsicons::bs_icon("geo-alt-fill"),
-          theme    = value_box_theme(bg = "#E74C3C", fg = "#fff")
+          theme    = value_box_theme(bg = "#D94F4F", fg = "#fff")
         ),
         value_box(
           title    = "Ontario County",
           value    = textOutput(ns("kpi_ontario")),
           showcase = bsicons::bs_icon("geo-alt-fill"),
-          theme    = value_box_theme(bg = "#2ECC71", fg = "#fff")
+          theme    = value_box_theme(bg = "#4CAF7D", fg = "#fff")
         ),
         value_box(
           title    = "New York State",
           value    = textOutput(ns("kpi_nys")),
           showcase = bsicons::bs_icon("geo-alt-fill"),
-          theme    = value_box_theme(bg = "#3498DB", fg = "#fff")
+          theme    = value_box_theme(bg = "#3D7FBA", fg = "#fff")
         )
       ),
       card(
         card_header("Trend Over Time"),
         plotlyOutput(ns("line_chart"), height = "380px")
-      ),
-      card(
-        card_header("Year-by-Year Comparison"),
-        plotlyOutput(ns("bar_chart"), height = "320px")
       )
     )
   )
@@ -87,72 +83,49 @@ make_im_server <- function(id, data, rate_col, rate_label) {
 
     output$line_chart <- renderPlotly({
       req(nrow(filtered()) > 0)
-      p <- suppressWarnings(filtered() %>%
-        ggplot(aes(
-          x = Year,
-          y = .data[[rate_col]],
-          color = Location,
-          group = Location,
-          text = paste0(
-            "<b>", Location, "</b><br>",
-            "Year: ", Year, "<br>",
-            rate_label, ": ", .data[[rate_col]], " per 1,000"
-          )
-        )) +
-        geom_line(linewidth = 1.1) +
-        geom_point(size = 2.5) +
-        scale_color_manual(values = location_colors) +
-        scale_x_continuous(breaks = seq(year_min, year_max, 1)) +
-        labs(
-          x     = "Year",
-          y     = paste0(rate_label, " (per 1,000 births)"),
-          color = NULL
-        ) +
-        theme_minimal(base_size = 13) +
-        theme(
-          axis.text.x  = element_text(angle = 45, hjust = 1),
-          legend.position = "top",
-          panel.grid.minor = element_blank()
-        ))
 
-      ggplotly(p, tooltip = "text") %>%
-        layout(
-          legend = list(orientation = "h", x = 0.5, xanchor = "center", y = 1.12),
-          hovermode = "closest"
+      # Pivot to wide format for direct plot_ly traces
+      df <- filtered() %>%
+        select(Year, Location, .data[[rate_col]]) %>%
+        tidyr::pivot_wider(names_from = Location, values_from = .data[[rate_col]]) %>%
+        arrange(Year)
+
+      plot_ly(df, x = ~Year) %>%
+        add_trace(
+          y      = ~Geneva,
+          name   = "Geneva",
+          type   = "scatter",
+          mode   = "lines+markers",
+          line   = list(color = location_colors[["Geneva"]], width = 2.5),
+          marker = list(color = location_colors[["Geneva"]], size = 7),
+          hovertemplate = paste0("Geneva: %{y:.1f} per 1,000<extra></extra>")
         ) %>%
-        config(displayModeBar = FALSE)
-    })
-
-    output$bar_chart <- renderPlotly({
-      req(nrow(filtered()) > 0)
-      p <- suppressWarnings(filtered() %>%
-        ggplot(aes(
-          x = factor(Year),
-          y = .data[[rate_col]],
-          fill = Location,
-          text = paste0(
-            "<b>", Location, "</b><br>",
-            "Year: ", Year, "<br>",
-            rate_label, ": ", .data[[rate_col]], " per 1,000"
-          )
-        )) +
-        geom_col(position = position_dodge(width = 0.8), width = 0.7) +
-        scale_fill_manual(values = location_colors) +
-        labs(
-          x    = "Year",
-          y    = paste0(rate_label, " (%)"),
-          fill = NULL
-        ) +
-        theme_minimal(base_size = 13) +
-        theme(
-          legend.position  = "top",
-          panel.grid.minor = element_blank()
-        ))
-
-      ggplotly(p, tooltip = "text") %>%
+        add_trace(
+          y      = ~Ontario,
+          name   = "Ontario County",
+          type   = "scatter",
+          mode   = "lines+markers",
+          line   = list(color = location_colors[["Ontario"]], width = 2, dash = "dash"),
+          marker = list(color = location_colors[["Ontario"]], size = 5),
+          hovertemplate = paste0("Ontario County: %{y:.1f} per 1,000<extra></extra>")
+        ) %>%
+        add_trace(
+          y      = ~NYS,
+          name   = "New York State",
+          type   = "scatter",
+          mode   = "lines+markers",
+          line   = list(color = location_colors[["NYS"]], width = 2, dash = "dot"),
+          marker = list(color = location_colors[["NYS"]], size = 5),
+          hovertemplate = paste0("NYS: %{y:.1f} per 1,000<extra></extra>")
+        ) %>%
         layout(
-          legend = list(orientation = "h", x = 0.5, xanchor = "center", y = 1.12),
-          hovermode = "closest"
+          xaxis     = list(title = "Year", tickmode = "linear", dtick = 1,
+                           tickangle = -45),
+          yaxis     = list(title = paste0(rate_label, " (per 1,000 births)"),
+                           rangemode = "tozero"),
+          legend    = list(orientation = "h", x = 0.5, xanchor = "center", y = 1.12),
+          hovermode = "x unified",
+          margin    = list(l = 50, r = 20, t = 20, b = 60)
         ) %>%
         config(displayModeBar = FALSE)
     })

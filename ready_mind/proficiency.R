@@ -50,42 +50,32 @@ make_proficiency_ui <- function(id, label) {
           choices  = c("Grade 3" = "3", "Grade 4" = "4", "Grade 8" = "8"),
           selected = "4"
         ),
-        selectInput(
-          ns("county"), "County",
-          choices  = proficiency_counties,
-          selected = "Ontario"
-        ),
+
         p("Percentage of students scoring at or above proficiency on New York State ",
           "assessments. Geneva City SD is highlighted in red. Ontario County, where ",
           "Geneva is located, is outlined in red on the map.")
       ),
 
       layout_columns(
-        col_widths = c(3, 3, 3, 3),
+        col_widths = c(4, 4, 4),
         value_box(
           title    = "Geneva City SD",
           value    = textOutput(ns("kpi_geneva_pct")),
           textOutput(ns("kpi_geneva_source")),
           showcase = bsicons::bs_icon("mortarboard-fill"),
-          theme    = value_box_theme(bg = "#E74C3C", fg = "#fff")
-        ),
-        value_box(
-          title    = "Geneva City SD Rank",
-          value    = textOutput(ns("kpi_geneva_rank")),
-          showcase = bsicons::bs_icon("bar-chart-fill"),
-          theme    = value_box_theme(bg = "#C0392B", fg = "#fff")
+          theme    = value_box_theme(bg = "#D94F4F", fg = "#fff")
         ),
         value_box(
           title    = "Ontario County Avg",
           value    = textOutput(ns("kpi_ontario_avg")),
           showcase = bsicons::bs_icon("geo-alt-fill"),
-          theme    = value_box_theme(bg = "#2ECC71", fg = "#fff")
+          theme    = value_box_theme(bg = "#4CAF7D", fg = "#fff")
         ),
         value_box(
           title    = "NY State Avg",
           value    = textOutput(ns("kpi_state_avg")),
           showcase = bsicons::bs_icon("map-fill"),
-          theme    = value_box_theme(bg = "#3498DB", fg = "#fff")
+          theme    = value_box_theme(bg = "#3D7FBA", fg = "#fff")
         )
       ),
 
@@ -120,7 +110,6 @@ make_proficiency_server <- function(id, data, county_sf) {
     # ── Column name reactives ────────────────────────────
     # Maps the subject toggle to the correct column names in data / county_sf.
     pct_col  <- reactive({ if (input$subject == "ELA") "ela_pct"  else "math_pct"  })
-    rank_col <- reactive({ if (input$subject == "ELA") "ela_rank" else "math_rank" })
     avg_col  <- reactive({ if (input$subject == "ELA") "ela_avg"  else "math_avg"  })
 
     total_districts <- nrow(data)
@@ -167,7 +156,7 @@ make_proficiency_server <- function(id, data, county_sf) {
     # ── Chart titles ─────────────────────────────────────
     output$map_title <- renderText(paste(input$subject, "Proficiency by County"))
     output$bar_title <- renderText(
-      paste0(input$subject, " Proficiency — ", input$county, " County")
+      paste0(input$subject, " Proficiency — Ontario County")
     )
 
     # ── Shared helper: adds polygons and legend to any leaflet/proxy object ──
@@ -193,7 +182,7 @@ make_proficiency_server <- function(id, data, county_sf) {
         addPolygons(
           data   = sf_df %>% filter(County == "Ontario"),
           fill   = FALSE,
-          color  = "#E74C3C",
+          color  = "#D94F4F",
           weight = 3
         ) %>%
         addLegend(
@@ -247,8 +236,8 @@ make_proficiency_server <- function(id, data, county_sf) {
         y         = ~PCT,
         type      = "scatter",
         mode      = "lines+markers",
-        line      = list(color = "#E74C3C", width = 2),
-        marker    = list(color = "#E74C3C", size = 7),
+        line      = list(color = "#D94F4F", width = 2),
+        marker    = list(color = "#D94F4F", size = 7),
         text      = ~paste0(input$subject, " (Grade ", input$grade, ")<br>Year: ", Year, "<br>", PCT, "% proficient"),
         hoverinfo = "text"
       ) %>%
@@ -262,7 +251,7 @@ make_proficiency_server <- function(id, data, county_sf) {
     # ── Filtered district data for bar chart ─────────────
     filtered_districts <- reactive({
       pct <- pct_col()
-      df  <- data %>% filter(County == input$county)
+      df  <- data %>% filter(County == "Ontario")
 
       # If Geneva's statewide value is NA, substitute grade-specific most recent
       geneva_idx <- which(df$District == "GENEVA CITY SD")
@@ -275,7 +264,7 @@ make_proficiency_server <- function(id, data, county_sf) {
         filter(!is.na(.data[[pct]])) %>%
         arrange(desc(.data[[pct]])) %>%
         mutate(
-          bar_color = ifelse(District == "GENEVA CITY SD", "#E74C3C", "#BBBBBB"),
+          bar_color = ifelse(District == "GENEVA CITY SD", "#D94F4F", "#BBBBBB"),
           pct_val   = .data[[pct]],
           District  = factor(District, levels = rev(District))
         )

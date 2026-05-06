@@ -10,9 +10,9 @@ library(plotly)
 
 # ── Shared constants ─────────────────────────────────────
 location_colors <- c(
-  "Geneva"  = "#E74C3C",
-  "Ontario" = "#2ECC71",
-  "NYS"     = "#3498DB"
+  "Geneva"  = "#D94F4F",
+  "Ontario" = "#4CAF7D",
+  "NYS"     = "#3D7FBA"
 )
 
 location_levels <- c("Geneva", "Ontario", "NYS")
@@ -140,15 +140,14 @@ snap_data <- snap_raw %>%
     Community = str_trim(Community),
     Year = as.integer(Year)
   ) %>%
-  filter(!is.na(Year))
+  filter(!is.na(Year) & Community != "Geneva Town")
 
 snap_communities <- sort(unique(snap_data$Community))
 snap_year_min    <- min(as.integer(snap_data$Year), na.rm = TRUE)
 snap_year_max    <- max(as.integer(snap_data$Year), na.rm = TRUE)
 
 community_colors <- c(
-  "Geneva"            = "#E74C3C",
-  "Ontario"           = "#2ECC71",
-  "Geneva Town"       = "#9B59B6",
-  "Ontario wo Geneva" = "#3498DB"
+  "Geneva"            = "#D94F4F",
+  "Ontario"           = "#4CAF7D",
+  "Ontario wo Geneva" = "#3D7FBA"
 )

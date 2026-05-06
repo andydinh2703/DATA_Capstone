@@ -1,0 +1,13 @@
+---
+output: html_document
+---
+
+## Background on Success for Geneva's Children:
+
+##### The mission of Success for Geneva's Children is to mobilize the community to improve the health and well-being of all our children and their families.
+
+
+
+## Success for Geneva's Children Statement of Purpose:
+
+##### "Through understanding the needs and interests of children and their parents, we collectively bring resources to improving their quality of life. We strive to build effective interventions and supports, knowing their profound and beneficial impact on the individual child, the family, and the community."

@@ -6,9 +6,9 @@
 # ──────────────────────────────────────────────────────────
 
 # ── Module-local constants ───────────────────────────────
-fs_color_good <- "#1D9E75"
-fs_color_bad  <- "#E74C3C"
-fs_color_neutral <- "#6C757D"
+fs_color_good <- "#2E8B6A"
+fs_color_bad  <- "#C0392B"
+fs_color_neutral <- "#7C868E"
 
 # Direction-of-favorability per household type (for color-coded stat cards)
 fs_higher_is_better <- c(
@@ -108,69 +108,36 @@ make_family_server <- function(id, data) {
 
       max_yr <- max(df$Year, na.rm = TRUE)
       min_yr <- min(df$Year, na.rm = TRUE)
-      latest_yrs   <- (max_yr - 2):max_yr
-      baseline_yrs <- min_yr:(min_yr + 2)
+      avg <- function(col) mean(df[[col]], na.rm = TRUE)
 
-      avg <- function(col, yrs) mean(df[[col]][df$Year %in% yrs], na.rm = TRUE)
+      g_avg <- avg("Geneva")
+      o_avg <- avg("Ontario")
+      n_avg <- avg("NYS")
 
-      g_late <- avg("Geneva",  latest_yrs)
-      o_late <- avg("Ontario", latest_yrs)
-      n_late <- avg("NYS",     latest_yrs)
-      g_base <- avg("Geneva",  baseline_yrs)
-      gap    <- g_late - n_late
-      chg    <- g_late - g_base
-
-      gap_col <- stat_color(gap, type)
-      chg_col <- stat_color(chg, type)
-      gap_lbl <- if (identical(gap_col, fs_color_good)) "favorable vs state" else "unfavorable vs state"
-      chg_lbl <- if (identical(chg_col, fs_color_good)) "improvement" else "decline"
-
-      late_lbl <- paste0(min(latest_yrs),   "–", max(latest_yrs))
-      base_lbl <- paste0(min(baseline_yrs), "–", max(baseline_yrs))
+      avg_lbl <- paste0(min_yr, "–", max_yr, " Average")
 
       layout_columns(
-        col_widths = c(2, 2, 2, 2, 2, 2),
+        col_widths = c(4, 4, 4),
         value_box(
-          title    = paste0("Geneva · ", late_lbl),
-          value    = fmt_pct(g_late),
-          p("3-yr avg", style = "margin: 0; font-size: 0.85em; opacity: 0.85;"),
+          title    = "Geneva",
+          value    = fmt_pct(g_avg),
+          p(avg_lbl, style = "margin: 0; font-size: 0.85em; opacity: 0.85;"),
           showcase = bsicons::bs_icon("geo-alt-fill"),
           theme    = value_box_theme(bg = location_colors[["Geneva"]], fg = "#fff")
         ),
         value_box(
-          title    = paste0("Ontario County · ", late_lbl),
-          value    = fmt_pct(o_late),
-          p("3-yr avg", style = "margin: 0; font-size: 0.85em; opacity: 0.85;"),
+          title    = "Ontario County",
+          value    = fmt_pct(o_avg),
+          p(avg_lbl, style = "margin: 0; font-size: 0.85em; opacity: 0.85;"),
           showcase = bsicons::bs_icon("geo-alt-fill"),
           theme    = value_box_theme(bg = location_colors[["Ontario"]], fg = "#fff")
         ),
         value_box(
-          title    = paste0("NYS · ", late_lbl),
-          value    = fmt_pct(n_late),
-          p("3-yr avg", style = "margin: 0; font-size: 0.85em; opacity: 0.85;"),
+          title    = "New York State",
+          value    = fmt_pct(n_avg),
+          p(avg_lbl, style = "margin: 0; font-size: 0.85em; opacity: 0.85;"),
           showcase = bsicons::bs_icon("geo-alt-fill"),
           theme    = value_box_theme(bg = location_colors[["NYS"]], fg = "#fff")
-        ),
-        value_box(
-          title    = "Gap vs NYS",
-          value    = fmt_pp(gap),
-          p(gap_lbl, style = "margin: 0; font-size: 0.85em;"),
-          showcase = bsicons::bs_icon("rulers"),
-          theme    = value_box_theme(bg = gap_col, fg = "#fff")
-        ),
-        value_box(
-          title    = paste0("Geneva · ", base_lbl),
-          value    = fmt_pct(g_base),
-          p("baseline (3-yr avg)", style = "margin: 0; font-size: 0.85em; opacity: 0.85;"),
-          showcase = bsicons::bs_icon("flag-fill"),
-          theme    = value_box_theme(bg = fs_color_neutral, fg = "#fff")
-        ),
-        value_box(
-          title    = paste0("Change since ", min_yr),
-          value    = fmt_pp(chg),
-          p(chg_lbl, style = "margin: 0; font-size: 0.85em;"),
-          showcase = bsicons::bs_icon("graph-up-arrow"),
-          theme    = value_box_theme(bg = chg_col, fg = "#fff")
         )
       )
     })

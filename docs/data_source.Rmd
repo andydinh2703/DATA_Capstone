@@ -1,0 +1,28 @@
+---
+output: html_document
+---
+
+# Data Sources
+
+
+### NYS Department of Health:
+
+1. Low birth weight data for all each county in New York State
+2. Infant mortality data for Geneva, Ontario County, and New York State
+
+### NYS Education Department:
+
+1. English language learners in the Geneva School District
+2. ELA and Math proficiency for Geneva based on grade
+
+### Census Data:
+
+1. Population and income data for Geneva, Ontario County, and New York State
+2. SNAP and TANF benefits for Geneva and Ontario County
+3. Family poverty rates for Geneva, Ontario County, and New York State
+4. Family structure data for Geneva, Ontario County, and New York State
+5. Health insurance coverage for Geneva, Ontario County, and New York State
+
+### Syracuse.com:
+
+1. Proficiency in ELA and math for all school districts within New York State
