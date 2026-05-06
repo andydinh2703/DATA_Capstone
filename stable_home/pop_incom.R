@@ -103,35 +103,46 @@ make_pi_server <- function(id, data) {
         df <- df |> rename(Geneva = `City of Geneva`)
       }
 
-      plot_ly(df, x = ~Year) |>
-        add_trace(
+      p <- plot_ly(df, x = ~Year)
+      
+      if ("Geneva" %in% names(df)) {
+        p <- p |> add_trace(
           y      = ~Geneva,
           name   = "Geneva",
           type   = "scatter",
           mode   = "lines+markers",
           line   = list(color = location_colors[["Geneva"]], width = 2.5),
           marker = list(color = location_colors[["Geneva"]], size = 7),
+          connectgaps = TRUE,
           hovertemplate = paste0("Geneva: %{y:.1f}<extra></extra>")
-        ) |>
-        add_trace(
+        )
+      }
+      if ("Ontario" %in% names(df)) {
+        p <- p |> add_trace(
           y      = ~Ontario,
           name   = "Ontario County",
           type   = "scatter",
           mode   = "lines+markers",
           line   = list(color = location_colors[["Ontario"]], width = 2, dash = "dash"),
           marker = list(color = location_colors[["Ontario"]], size = 5),
+          connectgaps = TRUE,
           hovertemplate = paste0("Ontario County: %{y:.1f}<extra></extra>")
-        ) |>
-        add_trace(
+        )
+      }
+      if ("NYS" %in% names(df)) {
+        p <- p |> add_trace(
           y      = ~NYS,
           name   = "New York State",
           type   = "scatter",
           mode   = "lines+markers",
           line   = list(color = location_colors[["NYS"]], width = 2, dash = "dot"),
           marker = list(color = location_colors[["NYS"]], size = 5),
+          connectgaps = TRUE,
           hovertemplate = paste0("NYS: %{y:.1f}<extra></extra>")
-        ) |>
-        layout(
+        )
+      }
+
+      p |> layout(
           xaxis     = list(title = "Year", tickmode = "linear", dtick = 1,
                            tickangle = -45),
           yaxis     = list(title = y_label(), rangemode = "normal"),

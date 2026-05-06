@@ -65,18 +65,21 @@ make_snap_tanf_ui <- function(id, label) {
         value_box(
           title    = "Geneva",
           value    = textOutput(ns("kpi_geneva")),
+          p(textOutput(ns("avg_subtitle")), style = "margin: 0; font-size: 0.85em; opacity: 0.85;"),
           showcase = bsicons::bs_icon("geo-alt-fill"),
           theme    = value_box_theme(bg = community_colors["Geneva"], fg = "#fff")
         ),
         value_box(
           title    = "Ontario County",
           value    = textOutput(ns("kpi_ontario")),
+          p(textOutput(ns("avg_subtitle2")), style = "margin: 0; font-size: 0.85em; opacity: 0.85;"),
           showcase = bsicons::bs_icon("geo-alt-fill"),
           theme    = value_box_theme(bg = community_colors["Ontario"], fg = "#fff")
         ),
         value_box(
           title    = "Ontario w/o Geneva",
           value    = textOutput(ns("kpi_ontario_wo")),
+          p(textOutput(ns("avg_subtitle3")), style = "margin: 0; font-size: 0.85em; opacity: 0.85;"),
           showcase = bsicons::bs_icon("geo-alt-fill"),
           theme    = value_box_theme(bg = community_colors["Ontario wo Geneva"], fg = "#fff")
         )
@@ -121,9 +124,19 @@ make_snap_tanf_server <- function(id) {
     })
 
     # ── KPIs ─────────────────────────────────────────────
-    output$kpi_geneva      <- renderText(snap_kpi(filtered(), "Geneva",            active_col()))
-    output$kpi_ontario     <- renderText(snap_kpi(filtered(), "Ontario",           active_col()))
-    output$kpi_ontario_wo  <- renderText(snap_kpi(filtered(), "Ontario wo Geneva", active_col()))
+    output$kpi_geneva     <- renderText(snap_kpi(filtered(), "Geneva",            active_col()))
+    output$kpi_ontario    <- renderText(snap_kpi(filtered(), "Ontario",           active_col()))
+    output$kpi_ontario_wo <- renderText(snap_kpi(filtered(), "Ontario wo Geneva", active_col()))
+
+    output$avg_subtitle <- renderText({
+      paste0(input$year_range[1], "–", input$year_range[2], " Average")
+    })
+    output$avg_subtitle2 <- renderText({
+      paste0(input$year_range[1], "–", input$year_range[2], " Average")
+    })
+    output$avg_subtitle3 <- renderText({
+      paste0(input$year_range[1], "–", input$year_range[2], " Average")
+    })
 
     # ── Chart titles ─────────────────────────────────────
     output$line_title  <- renderText(paste(input$program, "Trend Over Time"))

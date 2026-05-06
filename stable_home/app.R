@@ -39,18 +39,21 @@ make_sh_tab_ui <- function(id, label, year_min, year_max,
         value_box(
           title    = "Geneva",
           value    = textOutput(ns("kpi_geneva")),
+          p(textOutput(ns("avg_subtitle")), style = "margin: 0; font-size: 0.85em; opacity: 0.85;"),
           showcase = bsicons::bs_icon("geo-alt-fill"),
           theme    = value_box_theme(bg = location_colors["Geneva"], fg = "#fff")
         ),
         value_box(
           title    = "Ontario County",
           value    = textOutput(ns("kpi_ontario")),
+          p(textOutput(ns("avg_subtitle2")), style = "margin: 0; font-size: 0.85em; opacity: 0.85;"),
           showcase = bsicons::bs_icon("geo-alt-fill"),
           theme    = value_box_theme(bg = location_colors["Ontario"], fg = "#fff")
         ),
         value_box(
           title    = "New York State",
           value    = textOutput(ns("kpi_nys")),
+          p(textOutput(ns("avg_subtitle3")), style = "margin: 0; font-size: 0.85em; opacity: 0.85;"),
           showcase = bsicons::bs_icon("geo-alt-fill"),
           theme    = value_box_theme(bg = location_colors["NYS"], fg = "#fff")
         )
@@ -110,6 +113,16 @@ make_sh_tab_server <- function(id, data, rate_col, rate_label,
     output$kpi_ontario <- renderText(kpi_val("Ontario"))
     output$kpi_nys     <- renderText(kpi_val("NYS"))
 
+    output$avg_subtitle <- renderText({
+      paste0(input$year_range[1], "–", input$year_range[2], " Average")
+    })
+    output$avg_subtitle2 <- renderText({
+      paste0(input$year_range[1], "–", input$year_range[2], " Average")
+    })
+    output$avg_subtitle3 <- renderText({
+      paste0(input$year_range[1], "–", input$year_range[2], " Average")
+    })
+
     # ── Line chart ───────────────────────────────────────
     output$line_chart <- renderPlotly({
       req(nrow(filtered()) > 0)
@@ -167,35 +180,45 @@ make_sh_tab_server <- function(id, data, rate_col, rate_label,
           tidyr::pivot_wider(names_from = Location, values_from = .data[[rate_col]]) %>%
           arrange(Year)
 
-        plot_ly(df, x = ~Year) %>%
-          add_trace(
+        p <- plot_ly(df, x = ~Year)
+        if ("Geneva" %in% names(df)) {
+          p <- p %>% add_trace(
             y      = ~Geneva,
             name   = "Geneva",
             type   = "scatter",
             mode   = "lines+markers",
             line   = list(color = location_colors[["Geneva"]], width = 2.5),
             marker = list(color = location_colors[["Geneva"]], size = 7),
+            connectgaps = TRUE,
             hovertemplate = paste0("Geneva: %{y:.1f}%<extra></extra>")
-          ) %>%
-          add_trace(
+          )
+        }
+        if ("Ontario" %in% names(df)) {
+          p <- p %>% add_trace(
             y      = ~Ontario,
             name   = "Ontario County",
             type   = "scatter",
             mode   = "lines+markers",
             line   = list(color = location_colors[["Ontario"]], width = 2, dash = "dash"),
             marker = list(color = location_colors[["Ontario"]], size = 5),
+            connectgaps = TRUE,
             hovertemplate = paste0("Ontario County: %{y:.1f}%<extra></extra>")
-          ) %>%
-          add_trace(
+          )
+        }
+        if ("NYS" %in% names(df)) {
+          p <- p %>% add_trace(
             y      = ~NYS,
             name   = "New York State",
             type   = "scatter",
             mode   = "lines+markers",
             line   = list(color = location_colors[["NYS"]], width = 2, dash = "dot"),
             marker = list(color = location_colors[["NYS"]], size = 5),
+            connectgaps = TRUE,
             hovertemplate = paste0("NYS: %{y:.1f}%<extra></extra>")
-          ) %>%
-          layout(
+          )
+        }
+
+        p %>% layout(
             xaxis     = list(title = "Year", tickmode = "linear", dtick = 1,
                              tickangle = -45),
             yaxis     = list(title = paste0(rate_label, " (%)"),
@@ -277,11 +300,12 @@ make_sh_tab_server <- function(id, data, rate_col, rate_label,
           )
         }
 
-        plot_ly(slope_df, x = ~endpoint) %>%
-          make_slope_trace("Geneva",  "Geneva",         location_colors[["Geneva"]],  2.5, "solid", 8) %>%
-          make_slope_trace("Ontario", "Ontario County",  "#BBBBBB",                    2,   "dash",  6) %>%
-          make_slope_trace("NYS",     "New York State",  "#BBBBBB",                    2,   "dot",   6) %>%
-          layout(
+        p <- plot_ly(slope_df, x = ~endpoint)
+        if ("Geneva" %in% names(slope_df)) p <- p %>% make_slope_trace("Geneva",  "Geneva",         location_colors[["Geneva"]],  2.5, "solid", 8)
+        if ("Ontario" %in% names(slope_df)) p <- p %>% make_slope_trace("Ontario", "Ontario County",  "#BBBBBB",                    2,   "dash",  6)
+        if ("NYS" %in% names(slope_df)) p <- p %>% make_slope_trace("NYS",     "New York State",  "#BBBBBB",                    2,   "dot",   6)
+        
+        p %>% layout(
             xaxis     = list(title = ""),
             yaxis     = list(title = paste0(rate_label, " (%)"),
                              ticksuffix = "%"),

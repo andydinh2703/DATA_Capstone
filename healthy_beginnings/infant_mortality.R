@@ -33,18 +33,21 @@ make_im_ui <- function(id, label) {
         value_box(
           title    = "Geneva",
           value    = textOutput(ns("kpi_geneva")),
+          p(textOutput(ns("avg_subtitle")), style = "margin: 0; font-size: 0.85em; opacity: 0.85;"),
           showcase = bsicons::bs_icon("geo-alt-fill"),
           theme    = value_box_theme(bg = "#D94F4F", fg = "#fff")
         ),
         value_box(
           title    = "Ontario County",
           value    = textOutput(ns("kpi_ontario")),
+          p(textOutput(ns("avg_subtitle2")), style = "margin: 0; font-size: 0.85em; opacity: 0.85;"),
           showcase = bsicons::bs_icon("geo-alt-fill"),
           theme    = value_box_theme(bg = "#4CAF7D", fg = "#fff")
         ),
         value_box(
           title    = "New York State",
           value    = textOutput(ns("kpi_nys")),
+          p(textOutput(ns("avg_subtitle3")), style = "margin: 0; font-size: 0.85em; opacity: 0.85;"),
           showcase = bsicons::bs_icon("geo-alt-fill"),
           theme    = value_box_theme(bg = "#3D7FBA", fg = "#fff")
         )
@@ -80,6 +83,16 @@ make_im_server <- function(id, data, rate_col, rate_label) {
     output$kpi_geneva  <- renderText(kpi_val("Geneva"))
     output$kpi_ontario <- renderText(kpi_val("Ontario"))
     output$kpi_nys     <- renderText(kpi_val("NYS"))
+
+    output$avg_subtitle <- renderText({
+      paste0(input$year_range[1], "–", input$year_range[2], " Average")
+    })
+    output$avg_subtitle2 <- renderText({
+      paste0(input$year_range[1], "–", input$year_range[2], " Average")
+    })
+    output$avg_subtitle3 <- renderText({
+      paste0(input$year_range[1], "–", input$year_range[2], " Average")
+    })
 
     output$line_chart <- renderPlotly({
       req(nrow(filtered()) > 0)

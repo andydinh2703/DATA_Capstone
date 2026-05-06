@@ -61,19 +61,21 @@ make_proficiency_ui <- function(id, label) {
         value_box(
           title    = "Geneva City SD",
           value    = textOutput(ns("kpi_geneva_pct")),
-          textOutput(ns("kpi_geneva_source")),
+          p(textOutput(ns("kpi_geneva_source")), style = "margin: 0; font-size: 0.85em; opacity: 0.85;"),
           showcase = bsicons::bs_icon("mortarboard-fill"),
           theme    = value_box_theme(bg = "#D94F4F", fg = "#fff")
         ),
         value_box(
           title    = "Ontario County Avg",
           value    = textOutput(ns("kpi_ontario_avg")),
+          p(textOutput(ns("kpi_ontario_source")), style = "margin: 0; font-size: 0.85em; opacity: 0.85;"),
           showcase = bsicons::bs_icon("geo-alt-fill"),
           theme    = value_box_theme(bg = "#4CAF7D", fg = "#fff")
         ),
         value_box(
           title    = "NY State Avg",
           value    = textOutput(ns("kpi_state_avg")),
+          p(textOutput(ns("kpi_state_source")), style = "margin: 0; font-size: 0.85em; opacity: 0.85;"),
           showcase = bsicons::bs_icon("map-fill"),
           theme    = value_box_theme(bg = "#3D7FBA", fg = "#fff")
         )
@@ -132,6 +134,20 @@ make_proficiency_server <- function(id, data, county_sf) {
       paste0(round(latest$PCT, 1), "%")
     })
     output$kpi_geneva_source <- renderText({
+      val <- data %>% filter(District == "GENEVA CITY SD") %>% pull(pct_col())
+      if (length(val) > 0 && !all(is.na(val))) return("")
+      latest <- geneva_grade_latest()
+      if (is.null(latest)) return("")
+      paste0("Grade ", input$grade, " · ", latest$Year)
+    })
+    output$kpi_ontario_source <- renderText({
+      val <- data %>% filter(District == "GENEVA CITY SD") %>% pull(pct_col())
+      if (length(val) > 0 && !all(is.na(val))) return("")
+      latest <- geneva_grade_latest()
+      if (is.null(latest)) return("")
+      paste0("Grade ", input$grade, " · ", latest$Year)
+    })
+    output$kpi_state_source <- renderText({
       val <- data %>% filter(District == "GENEVA CITY SD") %>% pull(pct_col())
       if (length(val) > 0 && !all(is.na(val))) return("")
       latest <- geneva_grade_latest()

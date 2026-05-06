@@ -55,7 +55,7 @@ ui <- bslib::page_fluid(
     style = "display: flex; justify-content: space-between; align-items: center;
              padding: 16px 24px; margin-bottom: 8px;
              background: #FFFFFF;
-             border-bottom: 3px solid #D94F4F; border-radius: 8px;",
+             border-bottom: 3px solid #3D7FBA; border-radius: 8px;",
     div(
       h2("Ready, Set, GROW!", style = "margin: 0; font-weight: 700; color: #2C3E50;"),
       p("A Community Dashboard for Geneva's Children",
